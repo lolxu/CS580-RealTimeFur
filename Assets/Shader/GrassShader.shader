@@ -271,10 +271,10 @@ Shader "Custom/GrassShader"
     			{
     				GeometricData gOut;
     				// gOut.pos = TransformObjectToHClip(pos + mul(transformMat, offset));
-					gOut.pos = UnityObjectToClipPos(pos + mul(transformMat, offset));
+					gOut.pos = UnityWorldToClipPos(pos + mul(transformMat, offset));
     				
     				gOut.uv = uv;
-    				// gOut.worldPos = TransformObjectToWorld(pos + mul(transformMat, offset));
+    				// gOut.worldPos = mul(unity_ObjectToWorld, (pos + mul(transformMat, offset)));
     				// gOut.worldPos = TransformWorldToHClip(pos + mul(transformMat, offset));
     				gOut.worldPos = pos;
     				
