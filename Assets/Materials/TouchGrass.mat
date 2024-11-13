@@ -24,7 +24,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BladeTexture:
-        m_Texture: {fileID: 2800000, guid: e7f4bd2ee866aad4c82a03f243a257a6, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -88,7 +88,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _GrassFalloff: 0.31
+    - _GrassFalloff: 0
     - _GrassThreshold: 0
     - _Metallic: 0
     - _Mode: 0
@@ -102,9 +102,9 @@ Material:
     - _WindFrequency: 0.01
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.5885128, g: 0.6603774, b: 0.54512286, a: 1}
+    - _BaseColor: {r: 0.36210662, g: 0.07008721, b: 0.5943396, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _GrassTipColor: {r: 0.5905688, g: 0.8773585, b: 0.5255874, a: 1}
+    - _GrassTipColor: {r: 1, g: 0.4292453, b: 0.74412775, a: 1}
     - _WindVelocity: {r: 0.25, g: 0, b: 0.25, a: 0}
   m_BuildTextureStacks: []
