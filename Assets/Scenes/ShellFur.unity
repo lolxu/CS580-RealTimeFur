@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 405227973}
   - component: {fileID: 405227972}
   - component: {fileID: 405227971}
+  - component: {fileID: 405227975}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -183,8 +184,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: bd911e2dc1c62294da738b6868207362, type: 2}
-  - {fileID: 2100000, guid: 928ed4540782c5b49b9829cfa508ecf0, type: 2}
+  - {fileID: 2100000, guid: 1c8f04f47d6c99441a36e0d3aa09be71, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -229,6 +229,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &405227975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 405227970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e39bc443e7d6bd4cb6530b96e618596, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_shellMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  m_shellShader: {fileID: 4800000, guid: d749cb9a39112a64da05de0e93e3127f, type: 3}
+  m_shellCount: 10
+  m_shellLength: 0.5
+  m_density: 100
+  m_noiseMin: 0
+  m_noiseMax: 1
+  m_thiccness: 1
+  m_furColor: {r: 1, g: 0.4669811, b: 0.4669811, a: 1}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -335,6 +356,7 @@ GameObject:
   - component: {fileID: 826414683}
   - component: {fileID: 826414682}
   - component: {fileID: 826414681}
+  - component: {fileID: 826414685}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -384,8 +406,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: bd911e2dc1c62294da738b6868207362, type: 2}
-  - {fileID: 2100000, guid: 928ed4540782c5b49b9829cfa508ecf0, type: 2}
+  - {fileID: 2100000, guid: 1c8f04f47d6c99441a36e0d3aa09be71, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -430,6 +451,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &826414685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 826414680}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e39bc443e7d6bd4cb6530b96e618596, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_shellMesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+  m_shellShader: {fileID: 4800000, guid: d749cb9a39112a64da05de0e93e3127f, type: 3}
+  m_shellCount: 10
+  m_shellLength: 0.5
+  m_density: 100
+  m_noiseMin: 0
+  m_noiseMax: 1
+  m_thiccness: 1
+  m_furColor: {r: 1, g: 0.5235849, b: 0.5235849, a: 1}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
