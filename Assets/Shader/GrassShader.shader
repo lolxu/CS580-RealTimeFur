@@ -352,7 +352,7 @@ Shader "Custom/GrassShader"
 							    transformMat = tipTransformMat;
 						    }
 
-    						// Data for a single strip (for each 2 vertices
+    						// Data for a single strip (for each 2 vertices)
     						triangleStream.Append(transformGeomToClip(pos, float3(offset.x, offset.y, offset.z), transformMat, float2(0, t)));
     						triangleStream.Append(transformGeomToClip(pos, float3(-offset.x, offset.y, offset.z), transformMat, float2(1, t)));
     						

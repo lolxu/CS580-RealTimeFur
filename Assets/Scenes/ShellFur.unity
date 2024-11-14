@@ -185,6 +185,7 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 1c8f04f47d6c99441a36e0d3aa09be71, type: 2}
+  - {fileID: 2100000, guid: 928ed4540782c5b49b9829cfa508ecf0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -249,7 +250,7 @@ MonoBehaviour:
   m_noiseMin: 0
   m_noiseMax: 1
   m_thiccness: 1
-  m_furColor: {r: 1, g: 0.4669811, b: 0.4669811, a: 1}
+  m_furColor: {r: 0.745283, g: 0.745283, b: 0.745283, a: 1}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -407,6 +408,7 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 1c8f04f47d6c99441a36e0d3aa09be71, type: 2}
+  - {fileID: 2100000, guid: 928ed4540782c5b49b9829cfa508ecf0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -471,7 +473,7 @@ MonoBehaviour:
   m_noiseMin: 0
   m_noiseMax: 1
   m_thiccness: 1
-  m_furColor: {r: 1, g: 0.5235849, b: 0.5235849, a: 1}
+  m_furColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0

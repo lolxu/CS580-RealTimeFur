@@ -60,6 +60,8 @@ Shader "Custom/ShellFur"
                 float3 worldPos : TEXCOORD2;
             };
 
+            
+
             VertexToFrag vert(VertexData v)
             {
                 VertexToFrag result;
@@ -81,7 +83,14 @@ Shader "Custom/ShellFur"
 
             float4 frag(VertexToFrag f) : SV_Target
             {
+                // Creating more fur strands with multiplication of density
                 float2 denseUV = f.uv * _Density;
+
+                // Convert 0-1 uv to -1 to 1
+                float2 nUV = frac(denseUV) * 2 - 1;
+
+                float distFromCenter = length(nUV);
+                
                 
                 return _FurColor;
             }
