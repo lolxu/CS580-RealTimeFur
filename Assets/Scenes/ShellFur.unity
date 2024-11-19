@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.45141274, g: 0.5005527, b: 0.570454, a: 1}
+  m_IndirectSpecularColor: {r: 0.4514103, g: 0.500554, b: 0.5704536, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -135,7 +135,6 @@ GameObject:
   - component: {fileID: 405227973}
   - component: {fileID: 405227972}
   - component: {fileID: 405227971}
-  - component: {fileID: 405227975}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -185,7 +184,6 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 1c8f04f47d6c99441a36e0d3aa09be71, type: 2}
-  - {fileID: 2100000, guid: 928ed4540782c5b49b9829cfa508ecf0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -224,33 +222,12 @@ Transform:
   m_GameObject: {fileID: 405227970}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.24, y: 2.1, z: -9.52}
-  m_LocalScale: {x: 3, y: 3, z: 3}
+  m_LocalPosition: {x: 0, y: 2, z: -10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &405227975
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 405227970}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e39bc443e7d6bd4cb6530b96e618596, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_shellMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
-  m_shellShader: {fileID: 4800000, guid: d749cb9a39112a64da05de0e93e3127f, type: 3}
-  m_shellCount: 10
-  m_shellLength: 0.5
-  m_density: 100
-  m_noiseMin: 0
-  m_noiseMax: 1
-  m_thiccness: 1
-  m_furColor: {r: 0.745283, g: 0.745283, b: 0.745283, a: 1}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -338,13 +315,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705507993}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.29451764, y: -0.28746626, z: -0.119545974, w: 0.9035106}
+  m_LocalRotation: {x: -0.12655559, y: 0.91012686, z: -0.29157507, w: 0.2657757}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 27.611, y: -41.735, z: -25.777}
+  m_LocalEulerAnglesHint: {x: 27.611, y: 141.006, z: -25.777}
 --- !u!1 &826414680
 GameObject:
   m_ObjectHideFlags: 0
@@ -357,7 +334,6 @@ GameObject:
   - component: {fileID: 826414683}
   - component: {fileID: 826414682}
   - component: {fileID: 826414681}
-  - component: {fileID: 826414685}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -408,7 +384,6 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 1c8f04f47d6c99441a36e0d3aa09be71, type: 2}
-  - {fileID: 2100000, guid: 928ed4540782c5b49b9829cfa508ecf0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -453,27 +428,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &826414685
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 826414680}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e39bc443e7d6bd4cb6530b96e618596, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_shellMesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
-  m_shellShader: {fileID: 4800000, guid: d749cb9a39112a64da05de0e93e3127f, type: 3}
-  m_shellCount: 10
-  m_shellLength: 0.5
-  m_density: 100
-  m_noiseMin: 0
-  m_noiseMax: 1
-  m_thiccness: 1
-  m_furColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -510,7 +464,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.24528301, g: 0.24528301, b: 0.24528301, a: 0}
+  m_BackGroundColor: {r: 0.094918124, g: 0.157814, b: 0.254717, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -559,8 +513,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.09462422, y: 0.713404, z: -0.098216586, w: 0.68735325}
-  m_LocalPosition: {x: -12.593256, y: 5.046406, z: -1.5940695}
+  m_LocalRotation: {x: 0.182419, y: 0.67684627, z: -0.1788164, w: 0.6903819}
+  m_LocalPosition: {x: -17.614191, y: 13.097988, z: -3.6981406}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

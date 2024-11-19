@@ -17,6 +17,7 @@ public class ShellLayers : MonoBehaviour
     public float m_noiseMin = 0.0f;
     public float m_noiseMax = 1.0f;
     public float m_thiccness = 1.0f;
+    public float m_curvature = 0.25f;
     public Color m_furColor;
 
     private Material m_material;
@@ -63,6 +64,7 @@ public class ShellLayers : MonoBehaviour
             shellRend.material.SetFloat("_NoiseMin", m_noiseMin);
             shellRend.material.SetFloat("_NoiseMax", m_noiseMax);
             shellRend.material.SetFloat("_Thiccness", m_thiccness);
+            shellRend.material.SetFloat("_Curvature", m_curvature);
             shellRend.material.SetColor("_FurColor", m_furColor);
         }
     }
