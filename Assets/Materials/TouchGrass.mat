@@ -73,14 +73,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BendDelta: 0.2
-    - _BladeBendCurve: 3
+    - _BendDelta: 0
+    - _BladeBendCurve: 2.084
     - _BladeBendDistance: 0.38
-    - _BladeHeightMax: 0.72
-    - _BladeHeightMin: 0.27
+    - _BladeHeightMax: 0.81
+    - _BladeHeightMin: 0.41
     - _BladeSegments: 4
-    - _BladeWidthMax: 0.089
-    - _BladeWidthMin: 0.0641
+    - _BladeWidthMax: 0.0209
+    - _BladeWidthMin: 0.0166
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
@@ -97,7 +97,7 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TessellationGrassDistance: 0.063
+    - _TessellationGrassDistance: 0.025
     - _UVSec: 0
     - _WindFrequency: 0.01
     - _ZWrite: 1
