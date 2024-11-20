@@ -86,10 +86,10 @@ Material:
     - _Mode: 0
     - _NoiseMax: 0.5
     - _NoiseMin: 0
-    - _Occlusion: 0.5
+    - _Occlusion: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _RimLightPow: 0.25
+    - _RimLightPow: 0.1
     - _ShellAmount: 16
     - _ShellCount: 20
     - _ShellLength: 0.015
@@ -102,5 +102,5 @@ Material:
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FurColor: {r: 0.3638212, g: 0.4433962, b: 0.14431292, a: 1}
+    - _FurColor: {r: 0.24112871, g: 0.3207547, b: 0.01966893, a: 1}
   m_BuildTextureStacks: []

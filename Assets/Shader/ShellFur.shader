@@ -146,7 +146,7 @@ Shader "Custom/ShellFur"
                 float3 viewDir = WorldSpaceViewDir(f.pos);
                 float light = saturate(dot(normalize(_WorldSpaceLightPos0), f.normal)) * 0.5 + 0.5;
                 half rim = pow(1.0 - saturate(dot(normalize(viewDir), f.normal)), _RimLightPow);
-                color *= (light + rim) * _LightColor0 * shadow + float4( ShadeSH9(float4(f.normal, 1)), 1.0);
+                color *= (light + rim) * _LightColor0 * shadow + float4(ShadeSH9(float4(f.normal, 1)), 1.0);
                 
                 return float4(color * occlusionFactor);
             }
@@ -212,6 +212,7 @@ Shader "Custom/ShellFur"
                 float3 normal : TEXCOORD2;
                 float3 worldPos : TEXCOORD3;
                 float layer : TEXCOORD4;
+                unityShadowCoord4 _ShadowCoord : TEXCOORD5;
             };
 
             VertexData vert(VertexData v)
@@ -234,17 +235,24 @@ Shader "Custom/ShellFur"
                 // Get shadow position in clip space
                 float4 clipPos = UnityApplyLinearShadowBias(UnityObjectToClipPos(displaceWorldPos));
 
+                #if UNITY_REVERSED_Z
+                clipPos.z = min(clipPos.z, clipPos.w * UNITY_NEAR_CLIP_VALUE);
+                #else
+                clipPos.z = max(clipPos.z, clipPos.w * UNITY_NEAR_CLIP_VALUE);
+                #endif
+
                 output.worldPos = displaceWorldPos;
                 output.pos = clipPos;
                 output.normal = normalWorld;
                 output.alphaUV = TRANSFORM_TEX(input.uv, _FurMap);
                 output.baseUV = TRANSFORM_TEX(input.uv, _FurBaseMap);
                 output.layer = (float)index / _ShellCount;
+                output._ShadowCoord = ComputeScreenPos(output.pos);
 
                 stream.Append(output);
             }
 
-            [maxvertexcount(60)]
+            [maxvertexcount(40)]
             void geom(triangle VertexData input[3], inout TriangleStream<VertexToFrag> stream)
             {
                 for (int i = 0; i < _ShellCount; i++)
@@ -266,6 +274,7 @@ Shader "Custom/ShellFur"
                 if (f.layer > 0.0f && alpha.r < _AlphaCutoff) discard;
 
                 SHADOW_CASTER_FRAGMENT(f)
+                //return f.pos.z / f.pos.w;
             }
             ENDCG
         }
