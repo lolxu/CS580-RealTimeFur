@@ -11,6 +11,8 @@ Shader "Custom/ShellFur"
         _FurColor("Fur Color", Color) = (1,1,1,1)
         _Occlusion("Fuir Occlusion Factor", Range(0.0, 1.0)) = 0.1 
         _RimLightPow("Rim light power", Float) = 1.0
+        _ShadowBias("Shadow Bias on Fur", Float) = 0.0
+        _ShadowExtraBias("Shadow extra bias", Float) = 0.0
     }
     SubShader
     {
@@ -75,9 +77,9 @@ Shader "Custom/ShellFur"
                 float2 alphaUV : TEXCOORD0;
                 float2 baseUV : TEXCOORD1;
                 float3 normal : TEXCOORD2;
-                float3 worldPos : TEXCOORD3;
                 float layer : TEXCOORD4;
-                SHADOW_COORDS(5)
+                unityShadowCoord4 _ShadowCoord : TEXCOORD5;
+                float3 viewDir : TEXCOORD6;
             };
 
             VertexData vert(VertexData v)
@@ -92,25 +94,24 @@ Shader "Custom/ShellFur"
                 float3 vertexInput = input.vertexPos.xyz;
                 float3 normalInput = input.normal;
 
-                float3 worldPos = mul(unity_ObjectToWorld, vertexInput);
+                float3 worldPos = mul(unity_ObjectToWorld, float4(vertexInput, 1.0f)).xyz;
                 float3 normalWorld = normalize(UnityObjectToWorldNormal(normalInput));
 
                 float3 displaceWorldPos = worldPos + normalWorld * (_ShellLength * index);
-                float4 clipPos = UnityObjectToClipPos(displaceWorldPos);
+                float4 clipPos = UnityWorldToClipPos(displaceWorldPos);
 
-                output.worldPos = displaceWorldPos;
                 output.pos = clipPos;
                 output.normal = normalWorld;
                 output.alphaUV = TRANSFORM_TEX(input.uv, _FurMap);
                 output.baseUV = TRANSFORM_TEX(input.uv, _FurBaseMap);
                 output.layer = (float)index / _ShellCount;
+                output._ShadowCoord = ComputeScreenPos(clipPos);
+                output.viewDir = WorldSpaceViewDir(input.vertexPos);
                 
-                TRANSFER_SHADOW(output)
-
                 stream.Append(output);
             }
 
-            [maxvertexcount(40)]
+            [maxvertexcount(53)]
             void geom(triangle VertexData input[3], inout TriangleStream<VertexToFrag> stream)
             {
                 for (int i = 0; i < _ShellCount; i++)
@@ -143,9 +144,8 @@ Shader "Custom/ShellFur"
 
                 // Receiving shadows
                 half shadow = SHADOW_ATTENUATION(f);
-                float3 viewDir = WorldSpaceViewDir(f.pos);
                 float light = saturate(dot(normalize(_WorldSpaceLightPos0), f.normal)) * 0.5 + 0.5;
-                half rim = pow(1.0 - saturate(dot(normalize(viewDir), f.normal)), _RimLightPow);
+                half rim = pow(1.0 - saturate(dot(normalize(f.viewDir), f.normal)), _RimLightPow);
                 color *= (light + rim) * _LightColor0 * shadow + float4(ShadeSH9(float4(f.normal, 1)), 1.0);
                 
                 return float4(color * occlusionFactor);
@@ -186,6 +186,7 @@ Shader "Custom/ShellFur"
             float _ShellDirection;
             float _AlphaCutoff;
             float _Occlusion;
+            float _ShadowBias;
             float4 _FurColor;
 
             sampler2D _FurMap;
@@ -208,16 +209,38 @@ Shader "Custom/ShellFur"
             {
                 float4 pos : SV_POSITION;
                 float2 alphaUV : TEXCOORD0;
-                float2 baseUV : TEXCOORD1;
-                float3 normal : TEXCOORD2;
-                float3 worldPos : TEXCOORD3;
-                float layer : TEXCOORD4;
-                unityShadowCoord4 _ShadowCoord : TEXCOORD5;
+                float3 normal : TEXCOORD1;
+                float layer : TEXCOORD2;
             };
 
             VertexData vert(VertexData v)
             {
                 return v;
+            }
+
+            inline float3 CustomApplyShadowBias(float3 posWS, float3 normalWS)
+            {
+                //float3 lightDir = normalize(_WorldSpaceLightPos0.xyz - posWS);
+                posWS += _WorldSpaceLightPos0 * (unity_LightShadowBias.x + _ShadowBias);
+                float inv_ndotl = 1.0f - saturate(dot(_WorldSpaceLightPos0, normalWS));
+                float scale = inv_ndotl * unity_LightShadowBias.y;
+                posWS += normalWS * scale.xxx;
+
+                return posWS;
+            }
+
+            inline float4 GetShadowPositionHClip(float3 posWS, float3 normalWS)
+            {
+                posWS = CustomApplyShadowBias(posWS, normalWS);
+                float4 positionCS = UnityWorldToClipPos(posWS);
+                
+                #if UNITY_REVERSED_Z
+                positionCS.z = min(positionCS.z, positionCS.w * UNITY_NEAR_CLIP_VALUE);
+                #else
+                positionCS.z = max(positionCS.z, positionCS.w * UNITY_NEAR_CLIP_VALUE);
+                #endif
+
+                return positionCS;
             }
 
             void AppendShellVertex(inout TriangleStream<VertexToFrag> stream, VertexData input, int index)
@@ -227,32 +250,23 @@ Shader "Custom/ShellFur"
                 float3 vertexInput = input.vertexPos.xyz;
                 float3 normalInput = input.normal;
 
-                float3 worldPos = mul(unity_ObjectToWorld, vertexInput);
+                float3 worldPos = mul(unity_ObjectToWorld, float4(vertexInput, 1.0f)).xyz;
                 float3 normalWorld = normalize(UnityObjectToWorldNormal(normalInput));
 
                 float3 displaceWorldPos = worldPos + normalWorld * (_ShellLength * index);
 
                 // Get shadow position in clip space
-                float4 clipPos = UnityApplyLinearShadowBias(UnityObjectToClipPos(displaceWorldPos));
+                float4 clipPos =  UnityWorldToClipPos(displaceWorldPos);
 
-                #if UNITY_REVERSED_Z
-                clipPos.z = min(clipPos.z, clipPos.w * UNITY_NEAR_CLIP_VALUE);
-                #else
-                clipPos.z = max(clipPos.z, clipPos.w * UNITY_NEAR_CLIP_VALUE);
-                #endif
-
-                output.worldPos = displaceWorldPos;
-                output.pos = clipPos;
+                output.pos = UnityApplyLinearShadowBias(clipPos);
                 output.normal = normalWorld;
                 output.alphaUV = TRANSFORM_TEX(input.uv, _FurMap);
-                output.baseUV = TRANSFORM_TEX(input.uv, _FurBaseMap);
                 output.layer = (float)index / _ShellCount;
-                output._ShadowCoord = ComputeScreenPos(output.pos);
 
                 stream.Append(output);
             }
 
-            [maxvertexcount(40)]
+            [maxvertexcount(50)]
             void geom(triangle VertexData input[3], inout TriangleStream<VertexToFrag> stream)
             {
                 for (int i = 0; i < _ShellCount; i++)
@@ -273,8 +287,7 @@ Shader "Custom/ShellFur"
                 // Making fur strands darker and thinner deeper it goes
                 if (f.layer > 0.0f && alpha.r < _AlphaCutoff) discard;
 
-                SHADOW_CASTER_FRAGMENT(f)
-                //return f.pos.z / f.pos.w;
+                return f.pos.z / f.pos.w;
             }
             ENDCG
         }
