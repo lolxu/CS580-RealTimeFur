@@ -73,14 +73,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BendDelta: 0
+    - _BendDelta: 0.2
     - _BladeBendCurve: 2.47
     - _BladeBendDistance: 0.38
-    - _BladeHeightMax: 0.14
-    - _BladeHeightMin: 0
+    - _BladeHeightMax: 0.42
+    - _BladeHeightMin: 0.11
     - _BladeSegments: 4
-    - _BladeWidthMax: 0.0478
-    - _BladeWidthMin: 0.0283
+    - _BladeWidthMax: 0.0888
+    - _BladeWidthMin: 0.0591
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
@@ -88,21 +88,23 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _GrassFalloff: 0.176
-    - _GrassThreshold: 0.029
+    - _GrassFalloff: 0
+    - _GrassThreshold: 0
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
+    - _ShadowAmbient: 0.5
+    - _ShadowStrength: 0.35
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TessellationGrassDistance: 0.01
+    - _TessellationGrassDistance: 0.025
     - _UVSec: 0
     - _WindFrequency: 0.01
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.18867922, g: 0.18867922, b: 0.18867922, a: 1}
+    - _BaseColor: {r: 0.2924528, g: 0.2924528, b: 0.2924528, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _GrassTipColor: {r: 0.9622642, g: 0.9622642, b: 0.9622642, a: 1}

@@ -26,6 +26,9 @@ Shader "Custom/GrassShader"
     	_WindMap("Wind Offset Map", 2D) = "bump" {}
 		_WindVelocity("Wind Velocity", Vector) = (1, 0, 0, 0)
 		_WindFrequency("Wind Pulse Frequency", Range(0, 1)) = 0.01
+    	
+    	_ShadowStrength("Shadow Strength", Range(0, 1)) = 0.5  // Lower value = less intense shadows
+        _ShadowAmbient("Shadow Ambient", Range(0, 1)) = 0.2
     }
     SubShader
     {		
@@ -39,7 +42,7 @@ Shader "Custom/GrassShader"
 		
 		Pass
 		{
-			Name "GrassPass"
+			Name "Main Pass"
 			Tags
 			{
 				"LightMode" = "ForwardBase" 
@@ -67,6 +70,9 @@ Shader "Custom/GrassShader"
 				#pragma hull hull
 				#pragma domain domain
 				#pragma	geometry geom
+
+				#pragma multi_compile_fwdbase
+				#pragma multi_compile_fog
 					
 				
 				CBUFFER_START(UnityPerMaterial)
@@ -99,7 +105,8 @@ Shader "Custom/GrassShader"
 				    float4 _WindVelocity;
 				    float _WindFrequency;
 
-				    float4 _ShadowColor;
+				    float _ShadowStrength;
+					float _ShadowAmbient;
 			    CBUFFER_END
 
     			// Simple noise function, sourced from http://answers.unity.com/answers/624136/view.html
@@ -155,6 +162,7 @@ Shader "Custom/GrassShader"
     				float2 uv : TEXCOORD0;
     				float3 worldPos : TEXCOORD1;
     				float3 normal : TEXCOORD2;
+    				SHADOW_COORDS(3)  // Add shadow coordinates
     			};
 
     			// Structs for tessellation
@@ -276,6 +284,8 @@ Shader "Custom/GrassShader"
     				// gOut.worldPos = TransformWorldToHClip(pos + mul(transformMat, offset));
     				gOut.worldPos = pos;
 					gOut.normal = UnityObjectToWorldNormal(normal);
+
+    				TRANSFER_SHADOW(gOut);
     				
     				return gOut;
     			}
@@ -371,26 +381,353 @@ Shader "Custom/GrassShader"
 				
 				float4 frag(GeometricData gIn) : SV_Target
 				{
-					// Shadow doesn't work any more lol...
 					float4 color = tex2D(_BladeTexture, gIn.uv);
-
-					color *= lerp(_BaseColor, _GrassTipColor, gIn.uv.y);
-					
-					#if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE)
-						VertexPositionInputs vertexInput = (VertexPositionInputs)0;
-						vertexInput.positionWS = gIn.worldPos;
-
-						float4 shadowCoord = GetShadowCoord(vertexInput);
-						half shadowAttenuation = saturate(MainLightRealtimeShadow(shadowCoord) + 0.25f);
-						float4 shadowColor = lerp(0.0f, 1.0f, shadowAttenuation);
-						color *= shadowColor;
-					#endif
-					
-					return color;
+	                color *= lerp(_BaseColor, _GrassTipColor, gIn.uv.y);
+	                
+	                // Get shadow attenuation
+	                float shadow = SHADOW_ATTENUATION(gIn);
+	                
+	                // Make shadows less intense by lerping with 1
+	                shadow = lerp(1, shadow, _ShadowStrength);
+	                
+	                // Add ambient light to shadows
+	                shadow = max(shadow, _ShadowAmbient);
+	                
+	                // Apply modified shadows
+	                color.rgb *= shadow;
+	                
+	                return color;
 				}
 				
 			ENDCG
 		}
+
+		// Shadow caster pass
+        Pass
+        {
+            Name "ShadowCaster"
+            Tags { "LightMode" = "ShadowCaster" }
+            
+            ZWrite On
+            ZTest LEqual
+            Cull Off
+            
+            CGPROGRAM
+            #pragma vertex geomVert
+            #pragma hull hull
+            #pragma domain domain
+            #pragma geometry geom
+            #pragma fragment fragShadow
+            #pragma multi_compile_shadowcaster
+            #pragma target 4.6
+            
+            #include "UnityCG.cginc"
+            
+            #define UNITY_PI 3.14159265359f
+            #define UNITY_TWO_PI 6.28318530718f
+            #define BLADE_SEGMENTS 4
+            
+            CBUFFER_START(UnityPerMaterial)
+			    float4 _BaseColor;
+			    float4 _GrassTipColor;
+			    sampler2D _BladeTexture;
+
+			    float _BladeWidthMin;
+			    float _BladeWidthMax;
+			    float _BladeHeightMin;
+			    float _BladeHeightMax;
+
+    			int _BladeSegments;
+			    float _BladeBendDistance;
+			    float _BladeBendCurve;
+
+			    float _BendDelta;
+
+			    float _TessellationGrassDistance;
+
+			    sampler2D _GrassMap;
+			    float4 _GrassMap_ST;
+			    float _GrassThreshold;
+			    float _GrassFalloff;
+
+			    sampler2D _WindMap;
+    			// Unity provides value for float4 with "_ST" suffix.
+    			// The x,y contains texture scale, and z,w contains translation (offset)
+			    float4 _WindMap_ST; 
+			    float4 _WindVelocity;
+			    float _WindFrequency;
+
+			    float4 _ShadowColor;
+            CBUFFER_END
+            
+            struct VertexInput
+            {
+                float4 vertex : POSITION;
+                float3 normal : NORMAL;
+                float4 tangent : TANGENT;
+                float2 uv : TEXCOORD0;
+            };
+            
+            struct VertexOutput
+            {
+                float4 vertex : SV_POSITION;
+                float3 normal : NORMAL;
+                float4 tangent : TANGENT;
+                float2 uv : TEXCOORD0;
+            };
+            
+            struct GeometricData
+            {
+                float4 pos : SV_POSITION;
+                float2 uv : TEXCOORD0;
+            };
+
+            // Structs for tessellation
+    		struct TessellationFactors
+    		{
+    			float edge[3] : SV_TessFactor;
+    			float inside : SV_InsideTessFactor;
+    		};
+            
+            // Include your existing tessellation structs and functions here
+            // (TessellationFactors, hull, domain functions, etc.)
+            // ...
+
+            float rand(float3 co)
+            {
+                return frac(sin(dot(co.xyz, float3(12.9898, 78.233, 53.539))) * 43758.5453);
+            }
+            
+            float3x3 angleAxis3x3(float angle, float3 axis)
+            {
+                float c, s;
+                sincos(angle, s, c);
+
+                float t = 1 - c;
+                float x = axis.x;
+                float y = axis.y;
+                float z = axis.z;
+
+                return float3x3
+                (
+                    t * x * x + c, t * x * y - s * z, t * x * z + s * y,
+                    t * x * y + s * z, t * y * y + c, t * y * z - s * x,
+                    t * x * z - s * y, t * y * z + s * x, t * z * z + c
+                );
+            }
+            
+            // Copy your existing tessellation functions here
+            // (tessVert, tesselationEdgeFactor, patchConstantFunc, hull, domain)
+            // ...
+
+            // Simple vertex shader
+    		VertexOutput vert(VertexInput vIn)
+    		{
+    			VertexOutput vOut;
+    			vOut.vertex = UnityObjectToClipPos(vIn.vertex.xyz);
+    			vOut.normal = vIn.normal;
+    			vOut.tangent = vIn.tangent;
+    			vOut.uv = TRANSFORM_TEX(vIn.uv, _GrassMap);
+    			
+    			return vOut;
+    		}
+
+    		// Tesselation Vertex, just copies everything
+    		VertexOutput tessVert(VertexInput vIn)
+    		{
+    			VertexOutput vOut;
+    			vOut.vertex = vIn.vertex;
+    			vOut.tangent = vIn.tangent;
+    			vOut.normal = vIn.normal;
+    			vOut.uv = vIn.uv;
+
+    			return vOut;
+    		}
+
+    		// Geometric Shader things
+			VertexOutput geomVert(VertexInput vIn)
+    		{
+    			VertexOutput vOut;
+    			vOut.vertex = mul(unity_ObjectToWorld, vIn.vertex); // Transforms to world position
+    			vOut.normal = UnityObjectToWorldNormal(vIn.normal);
+    			vOut.tangent = vIn.tangent;
+    			vOut.uv = TRANSFORM_TEX(vIn.uv, _GrassMap);
+    			
+    			return vOut;
+    		}
+
+    		// Tessleation Shader stuff
+
+    		// Tessellation factor for an edge based on viewer position
+    		float tesselationEdgeFactor(VertexInput vIn_0, VertexInput vIn_1)
+    		{
+    			float3 v0 = vIn_0.vertex.xyz;
+    			float3 v1 = vIn_1.vertex.xyz;
+    			float edgeLength = distance(v0, v1);
+
+    			float result = edgeLength / _TessellationGrassDistance;
+
+    			return result;
+    		}
+
+    		// The patch constant function to create control points on the patch.
+    		// Increasing tessellation factors adds new vertices on each edge.
+    		TessellationFactors patchConstantFunc(InputPatch<VertexInput, 3> patch)
+    		{
+    			TessellationFactors fac;
+
+    			fac.edge[0] = tesselationEdgeFactor(patch[1], patch[2]);
+    			fac.edge[1] = tesselationEdgeFactor(patch[2], patch[0]);
+    			fac.edge[2] = tesselationEdgeFactor(patch[0], patch[1]);
+    			fac.inside = (fac.edge[0] + fac.edge[1] + fac.edge[2]) / 3.0f; // New vertex
+
+    			return fac;
+    		}
+
+    		// The hull function for the tessellation shader.
+    		// Operates on each patch, and outputs new control points for tessellation stages
+    		[domain("tri")]
+    		[outputcontrolpoints(3)]
+    		[outputtopology("triangle_cw")]
+    		[partitioning("integer")]
+    		[patchconstantfunc("patchConstantFunc")]
+    		VertexInput hull(InputPatch<VertexInput, 3> patch, uint id : SV_OutputControlPointID)
+    		{
+    			return patch[id];
+    		}
+
+    		// The graphics pipeline will generate new vertices
+
+    		// The domain function for the tessellation shader
+    		// It interpolates the properties of vertices to create new vertices
+    		[domain("tri")]
+			VertexOutput domain(TessellationFactors factors, OutputPatch<VertexInput, 3> patch, float3 barycentricCoordinates : SV_DomainLocation)
+    		{
+    			VertexInput vIn;
+    			// barycentricCoordinates are weighted coordinates of each vertices
+    			
+    			#define INTERPOLATE(fieldname) vIn.fieldname = \
+    				patch[0].fieldname * barycentricCoordinates.x + \
+    				patch[1].fieldname * barycentricCoordinates.y + \
+    				patch[2].fieldname * barycentricCoordinates.z;
+
+    			INTERPOLATE(vertex)
+    			INTERPOLATE(normal)
+    			INTERPOLATE(tangent)
+    			INTERPOLATE(uv)
+
+    			return tessVert(vIn);
+    		}
+
+            
+            GeometricData transformGeomToClipShadow(float3 pos, float3 offset, float3x3 transformMat)
+            {
+                GeometricData gOut;
+                float3 worldPos = pos + mul(transformMat, offset);
+                gOut.pos = UnityWorldToClipPos(worldPos);
+                gOut.pos = UnityApplyLinearShadowBias(gOut.pos);
+            	gOut.uv = float2(0.0, 0.0);
+                return gOut;
+            }
+            
+            [maxvertexcount(BLADE_SEGMENTS * 2 + 1)]
+            void geom(point VertexOutput input[1], inout TriangleStream<GeometricData> triangleStream)
+            {
+                // Copy your existing geometry shader code here but use transformGeomToClipShadow
+                // instead of transformGeomToClip
+                // ...
+            	// Read from the Grass Map texture
+    				float grassVisibility = tex2Dlod(_GrassMap, float4(input[0].uv, 0, 0)).r;
+
+    				// Check if the grass needs to spawn or not
+    				if (grassVisibility >= _GrassThreshold)
+    				{
+    				
+    					float3 pos = input[0].vertex.xyz;
+    					float3 normal = input[0].normal;
+    					float4 tangent = input[0].tangent;
+
+    					float3 bitangent = cross(normal, tangent.xyz) * tangent.w;
+
+    					float3x3 tangentToLocal = float3x3
+    					(
+    						tangent.x, bitangent.x, normal.x,
+    						tangent.y, bitangent.y, normal.y,
+    						tangent.z, bitangent.z, normal.z
+						);
+
+    					// Rotate around y-axis by some random amount
+    					float3x3 randRotateMat = angleAxis3x3(rand(pos) * UNITY_TWO_PI, float3(0, 0, 1.0f));
+
+    					// Rotate around the bottom of the blade by some random amount
+    					float3x3 randBendMat = angleAxis3x3(rand(pos.zzx) * _BendDelta * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
+
+    					// float3x3 transformMat = float3x3
+    					// (
+    					// 	1, 0, 0,
+    					// 	0, 1, 0,
+    					// 	0, 0, 1
+    					// );
+
+    					// Sampling from wind texture
+    					float2 windUV = pos.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
+    					float2 windSample = (tex2Dlod(_WindMap, float4(windUV, 0, 0)).xy * 2 - 1) * length(_WindVelocity);
+
+						// Wind Transforms
+    					float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
+    					float3x3 windMat = angleAxis3x3(UNITY_PI * windSample, windAxis);
+
+    					// Transform matrices for base and tip of a blade
+    					float3x3 baseTransformMat = mul(tangentToLocal, randRotateMat);
+    					float3x3 tipTransformMat = mul(mul(mul(tangentToLocal, windMat), randBendMat), randRotateMat);
+    					
+						float falloff = smoothstep(_GrassThreshold, _GrassThreshold + _GrassFalloff, grassVisibility);
+    					
+    					float width = lerp(_BladeWidthMin, _BladeWidthMax, rand(pos.xyz) * falloff);
+    					float height = lerp(_BladeHeightMin, _BladeHeightMax, rand(pos.zyx) * falloff);
+    					float forward = rand(pos.yyz) * _BladeBendDistance;
+
+    					for (int i = 0; i < _BladeSegments; i++)
+    					{
+    						float t = i / (float)_BladeSegments;
+    						float3 offset = float3(width * (1 - t), pow(t, _BladeBendCurve) * forward, height * t);
+
+    						float3x3 transformMat;
+    						if (i == 0)
+    						{
+    							transformMat = baseTransformMat;
+    						}
+						    else
+						    {
+							    transformMat = tipTransformMat;
+						    }
+
+    						// Data for a single strip (for each 2 vertices)
+    						triangleStream.Append(transformGeomToClipShadow(pos, float3(offset.x, offset.y, offset.z), transformMat));
+    						triangleStream.Append(transformGeomToClipShadow(pos, float3(-offset.x, offset.y, offset.z), transformMat));
+    						
+    					}
+
+    					// Adding for the tip
+    					triangleStream.Append(transformGeomToClipShadow(pos, float3(0, forward, height), tipTransformMat));
+
+    					// Data for a single strip
+    					// triangleStream.Append(transformGeomToClip(pos, float3(-0.1f, 0.0f, 0.0f), baseTransformMat, float2(0.0f, 0.0f)));
+    					// triangleStream.Append(transformGeomToClip(pos, float3(0.1f, 0.0f, 0.0f), baseTransformMat, float2(1.0f, 0.0f)));
+    					// triangleStream.Append(transformGeomToClip(pos, float3(0.0f, 0.0f, 0.5f), tipTransformMat, float2(0.5f, 1.0f)));
+
+    					triangleStream.RestartStrip();
+    				}
+            }
+            
+            float4 fragShadow(GeometricData i) : SV_Target
+            {
+                //SHADOW_CASTER_FRAGMENT(i)
+            	return 0;
+            }
+            
+            ENDCG
+        }
 	}
 	FallBack "Diffuse"
 }
