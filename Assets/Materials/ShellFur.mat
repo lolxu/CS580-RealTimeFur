@@ -73,7 +73,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AlphaCutoff: 0.557
+    - _AlphaCutoff: 0.52
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _Density: 1
@@ -93,8 +93,8 @@ Material:
     - _ShadowBias: 0
     - _ShadowExtraBias: 0
     - _ShellAmount: 16
-    - _ShellCount: 100
-    - _ShellLength: 0.05
+    - _ShellCount: 45
+    - _ShellLength: 0.04
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -104,6 +104,7 @@ Material:
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FurColor: {r: 0.24112871, g: 0.3207547, b: 0.01966893, a: 1}
+    - _FurColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _ShadowBias: {r: -1, g: -1, b: -1, a: 1}
+    - _ShellDirection: {r: 0, g: -1.5, b: 0, a: 1}
   m_BuildTextureStacks: []

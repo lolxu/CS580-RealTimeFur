@@ -47,6 +47,8 @@ Shader "Custom/GrassShader"
 			
 			CGPROGRAM
 				#include "UnityCG.cginc"
+				#include "UnityPBSLighting.cginc"
+				#include "AutoLight.cginc"
 				
 				#pragma require geometry
 				#pragma require tessellation tessHW
@@ -152,6 +154,7 @@ Shader "Custom/GrassShader"
     				float4 pos : SV_POSITION;
     				float2 uv : TEXCOORD0;
     				float3 worldPos : TEXCOORD1;
+    				float3 normal : TEXCOORD2;
     			};
 
     			// Structs for tessellation
@@ -205,11 +208,6 @@ Shader "Custom/GrassShader"
     				float3 v0 = vIn_0.vertex.xyz;
     				float3 v1 = vIn_1.vertex.xyz;
     				float edgeLength = distance(v0, v1);
-
-					// float3 edgeCenter = (v0 + v1) * 0.5f;
-					// float viewDist = distance(edgeCenter, _WorldSpaceCameraPos) / 10.0f;
-    				
-    				// float result = edgeLength * _ScreenParams.y / (_TessellationGrassDistance * viewDist);
 
     				float result = edgeLength / _TessellationGrassDistance;
 
@@ -267,7 +265,7 @@ Shader "Custom/GrassShader"
 
     			
     			// Transform to clip space for Geometric Shader
-				GeometricData transformGeomToClip(float3 pos, float3 offset, float3x3 transformMat, float2 uv)
+				GeometricData transformGeomToClip(float3 pos, float3 offset, float3x3 transformMat, float2 uv, float3 normal)
     			{
     				GeometricData gOut;
     				// gOut.pos = TransformObjectToHClip(pos + mul(transformMat, offset));
@@ -277,6 +275,7 @@ Shader "Custom/GrassShader"
     				// gOut.worldPos = mul(unity_ObjectToWorld, (pos + mul(transformMat, offset)));
     				// gOut.worldPos = TransformWorldToHClip(pos + mul(transformMat, offset));
     				gOut.worldPos = pos;
+					gOut.normal = UnityObjectToWorldNormal(normal);
     				
     				return gOut;
     			}
@@ -353,13 +352,13 @@ Shader "Custom/GrassShader"
 						    }
 
     						// Data for a single strip (for each 2 vertices)
-    						triangleStream.Append(transformGeomToClip(pos, float3(offset.x, offset.y, offset.z), transformMat, float2(0, t)));
-    						triangleStream.Append(transformGeomToClip(pos, float3(-offset.x, offset.y, offset.z), transformMat, float2(1, t)));
+    						triangleStream.Append(transformGeomToClip(pos, float3(offset.x, offset.y, offset.z), transformMat, float2(0, t), normal));
+    						triangleStream.Append(transformGeomToClip(pos, float3(-offset.x, offset.y, offset.z), transformMat, float2(1, t), normal));
     						
     					}
 
     					// Adding for the tip
-    					triangleStream.Append(transformGeomToClip(pos, float3(0, forward, height), tipTransformMat, float2(0.5, 1)));
+    					triangleStream.Append(transformGeomToClip(pos, float3(0, forward, height), tipTransformMat, float2(0.5, 1), normal));
 
     					// Data for a single strip
     					// triangleStream.Append(transformGeomToClip(pos, float3(-0.1f, 0.0f, 0.0f), baseTransformMat, float2(0.0f, 0.0f)));
@@ -374,6 +373,8 @@ Shader "Custom/GrassShader"
 				{
 					// Shadow doesn't work any more lol...
 					float4 color = tex2D(_BladeTexture, gIn.uv);
+
+					color *= lerp(_BaseColor, _GrassTipColor, gIn.uv.y);
 					
 					#if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE)
 						VertexPositionInputs vertexInput = (VertexPositionInputs)0;
@@ -385,7 +386,7 @@ Shader "Custom/GrassShader"
 						color *= shadowColor;
 					#endif
 					
-					return color * lerp(_BaseColor, _GrassTipColor, gIn.uv.y);
+					return color;
 				}
 				
 			ENDCG

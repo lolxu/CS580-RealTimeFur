@@ -13,6 +13,7 @@ Shader "Custom/ShellFur"
         _RimLightPow("Rim light power", Float) = 1.0
         _ShadowBias("Shadow Bias on Fur", Float) = 0.0
         _ShadowExtraBias("Shadow extra bias", Float) = 0.0
+        _ShellDirection("Base shell move direction", Vector) = (1.0, 1.0, 1.0, 1.0)
     }
     SubShader
     {
@@ -49,10 +50,10 @@ Shader "Custom/ShellFur"
             float _Thiccness;
             float _Curvature;
             float _DisplacementStength;
-            float _ShellDirection;
             float _AlphaCutoff;
             float _Occlusion;
             float _RimLightPow;
+            float4 _ShellDirection;
             float4 _FurColor;
 
             sampler2D _FurMap;
@@ -97,7 +98,14 @@ Shader "Custom/ShellFur"
                 float3 worldPos = mul(unity_ObjectToWorld, float4(vertexInput, 1.0f)).xyz;
                 float3 normalWorld = normalize(UnityObjectToWorldNormal(normalInput));
 
-                float3 displaceWorldPos = worldPos + normalWorld * (_ShellLength * index);
+                // Adding displacement
+                float displaceFactor = pow((float)index / _ShellCount, _ShellDirection.w);
+
+                float3 disp = displaceFactor * _ShellDirection.xyz;
+                float3 shellMoveDir = normalize(normalWorld + disp);
+                
+                float3 displaceWorldPos = worldPos + shellMoveDir * (_ShellLength * index);
+                
                 float4 clipPos = UnityWorldToClipPos(displaceWorldPos);
 
                 output.pos = clipPos;
@@ -183,10 +191,10 @@ Shader "Custom/ShellFur"
             float _Thiccness;
             float _Curvature;
             float _DisplacementStength;
-            float _ShellDirection;
             float _AlphaCutoff;
             float _Occlusion;
             float _ShadowBias;
+            float4 _ShellDirection;
             float4 _FurColor;
 
             sampler2D _FurMap;
@@ -218,31 +226,6 @@ Shader "Custom/ShellFur"
                 return v;
             }
 
-            inline float3 CustomApplyShadowBias(float3 posWS, float3 normalWS)
-            {
-                //float3 lightDir = normalize(_WorldSpaceLightPos0.xyz - posWS);
-                posWS += _WorldSpaceLightPos0 * (unity_LightShadowBias.x + _ShadowBias);
-                float inv_ndotl = 1.0f - saturate(dot(_WorldSpaceLightPos0, normalWS));
-                float scale = inv_ndotl * unity_LightShadowBias.y;
-                posWS += normalWS * scale.xxx;
-
-                return posWS;
-            }
-
-            inline float4 GetShadowPositionHClip(float3 posWS, float3 normalWS)
-            {
-                posWS = CustomApplyShadowBias(posWS, normalWS);
-                float4 positionCS = UnityWorldToClipPos(posWS);
-                
-                #if UNITY_REVERSED_Z
-                positionCS.z = min(positionCS.z, positionCS.w * UNITY_NEAR_CLIP_VALUE);
-                #else
-                positionCS.z = max(positionCS.z, positionCS.w * UNITY_NEAR_CLIP_VALUE);
-                #endif
-
-                return positionCS;
-            }
-
             void AppendShellVertex(inout TriangleStream<VertexToFrag> stream, VertexData input, int index)
             {
                 VertexToFrag output;
@@ -253,7 +236,13 @@ Shader "Custom/ShellFur"
                 float3 worldPos = mul(unity_ObjectToWorld, float4(vertexInput, 1.0f)).xyz;
                 float3 normalWorld = normalize(UnityObjectToWorldNormal(normalInput));
 
-                float3 displaceWorldPos = worldPos + normalWorld * (_ShellLength * index);
+                // Apply shell displacement
+                float displaceFactor = pow((float)index / _ShellCount, _ShellDirection.w);
+
+                float3 disp = displaceFactor * _ShellDirection.xyz;
+                float3 shellMoveDir = normalize(normalWorld + disp);
+                
+                float3 displaceWorldPos = worldPos + shellMoveDir * (_ShellLength * index);
 
                 // Get shadow position in clip space
                 float4 clipPos =  UnityWorldToClipPos(displaceWorldPos);
