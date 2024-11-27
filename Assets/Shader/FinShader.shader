@@ -1,4 +1,4 @@
-Shader "Custom/GrassShader"
+Shader "Custom/FinShader"
 {
     Properties
     {
@@ -6,8 +6,8 @@ Shader "Custom/GrassShader"
         _GrassTipColor("Grass Tip Color", Color) = (1, 1, 1, 1)
         _BladeTexture("Blade Texture", 2D) = "white" {}
         
-        _BladeWidthMin("Blade Minimum Width", Range(0, 0.1)) = 0.015
-        _BladeWidthMax("Blade Maximum Width", Range(0, 0.1)) = 0.06
+        _BladeWidthMin("Blade Minimum Width", Range(0, 5)) = 0.015
+        _BladeWidthMax("Blade Maximum Width", Range(0, 5)) = 0.06
         _BladeHeightMin("Blade Minimum Height", Range(0, 5)) = 0.1
         _BladeHeightMax("Blade Maximum Height", Range(0, 5)) = 0.2
         
@@ -29,6 +29,8 @@ Shader "Custom/GrassShader"
     	
     	_ShadowStrength("Shadow Strength", Range(0, 1)) = 0.5  // Lower value = less intense shadows
         _ShadowAmbient("Shadow Ambient", Range(0, 1)) = 0.2
+    	
+    	_FurDirection("Base fur move direction", Vector) = (1.0, 1.0, 1.0, 1.0)
     }
     SubShader
     {		
@@ -46,7 +48,9 @@ Shader "Custom/GrassShader"
 			Tags
 			{
 				"LightMode" = "ForwardBase" 
+				"IgnoreProjection" = "True"
 			}
+			ZWrite On
 			
 			CGPROGRAM
 				#include "UnityCG.cginc"
@@ -75,39 +79,38 @@ Shader "Custom/GrassShader"
 				#pragma multi_compile_fog
 					
 				
-				CBUFFER_START(UnityPerMaterial)
-				    float4 _BaseColor;
-				    float4 _GrassTipColor;
-				    sampler2D _BladeTexture;
+			    float4 _BaseColor;
+			    float4 _GrassTipColor;
+			    sampler2D _BladeTexture;
 
-				    float _BladeWidthMin;
-				    float _BladeWidthMax;
-				    float _BladeHeightMin;
-				    float _BladeHeightMax;
+			    float _BladeWidthMin;
+			    float _BladeWidthMax;
+			    float _BladeHeightMin;
+			    float _BladeHeightMax;
 
-    				int _BladeSegments;
-				    float _BladeBendDistance;
-				    float _BladeBendCurve;
+    			int _BladeSegments;
+			    float _BladeBendDistance;
+			    float _BladeBendCurve;
 
-				    float _BendDelta;
+			    float _BendDelta;
 
-				    float _TessellationGrassDistance;
+			    float _TessellationGrassDistance;
 
-				    sampler2D _GrassMap;
-				    float4 _GrassMap_ST;
-				    float _GrassThreshold;
-				    float _GrassFalloff;
+			    sampler2D _GrassMap;
+			    float4 _GrassMap_ST;
+			    float _GrassThreshold;
+			    float _GrassFalloff;
 
-				    sampler2D _WindMap;
-    				// Unity provides value for float4 with "_ST" suffix.
-    				// The x,y contains texture scale, and z,w contains translation (offset)
-				    float4 _WindMap_ST; 
-				    float4 _WindVelocity;
-				    float _WindFrequency;
+			    sampler2D _WindMap;
+			    float4 _WindMap_ST; 
+			    float4 _WindVelocity;
+			    float _WindFrequency;
 
-				    float _ShadowStrength;
-					float _ShadowAmbient;
-			    CBUFFER_END
+			    float _ShadowStrength;
+				float _ShadowAmbient;
+
+				float4 _FurDirection;
+			    
 
     			// Simple noise function, sourced from http://answers.unity.com/answers/624136/view.html
 				// Extended discussion on this function can be found at the following link:
@@ -276,12 +279,9 @@ Shader "Custom/GrassShader"
 				GeometricData transformGeomToClip(float3 pos, float3 offset, float3x3 transformMat, float2 uv, float3 normal)
     			{
     				GeometricData gOut;
-    				// gOut.pos = TransformObjectToHClip(pos + mul(transformMat, offset));
-					gOut.pos = UnityWorldToClipPos(pos + mul(transformMat, offset));
     				
+					gOut.pos = UnityWorldToClipPos(pos + mul(transformMat, offset));
     				gOut.uv = uv;
-    				// gOut.worldPos = mul(unity_ObjectToWorld, (pos + mul(transformMat, offset)));
-    				// gOut.worldPos = TransformWorldToHClip(pos + mul(transformMat, offset));
     				gOut.worldPos = pos;
 					gOut.normal = UnityObjectToWorldNormal(normal);
 
@@ -319,7 +319,7 @@ Shader "Custom/GrassShader"
     					float3x3 randRotateMat = angleAxis3x3(rand(pos) * UNITY_TWO_PI, float3(0, 0, 1.0f));
 
     					// Rotate around the bottom of the blade by some random amount
-    					float3x3 randBendMat = angleAxis3x3(rand(pos.zzx) * _BendDelta * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
+    					float3x3 randBendMat = angleAxis3x3(rand(pos) * _BendDelta * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
 
     					// float3x3 transformMat = float3x3
     					// (
@@ -346,10 +346,10 @@ Shader "Custom/GrassShader"
     					float height = lerp(_BladeHeightMin, _BladeHeightMax, rand(pos.zyx) * falloff);
     					float forward = rand(pos.yyz) * _BladeBendDistance;
 
-    					for (int i = 0; i < _BladeSegments; i++)
+    					for (int i = 0; i <= _BladeSegments; i++)
     					{
-    						float t = i / (float)_BladeSegments;
-    						float3 offset = float3(width * (1 - t), pow(t, _BladeBendCurve) * forward, height * t);
+    						float t = clamp(i / (float)_BladeSegments, 0.0f, 1.0f);
+    						float3 offset = float3(width, pow(t, _BladeBendCurve) * forward, height * t);
 
     						float3x3 transformMat;
     						if (i == 0)
@@ -367,14 +367,6 @@ Shader "Custom/GrassShader"
     						
     					}
 
-    					// Adding for the tip
-    					triangleStream.Append(transformGeomToClip(pos, float3(0, forward, height), tipTransformMat, float2(0.5, 1), normal));
-
-    					// Data for a single strip
-    					// triangleStream.Append(transformGeomToClip(pos, float3(-0.1f, 0.0f, 0.0f), baseTransformMat, float2(0.0f, 0.0f)));
-    					// triangleStream.Append(transformGeomToClip(pos, float3(0.1f, 0.0f, 0.0f), baseTransformMat, float2(1.0f, 0.0f)));
-    					// triangleStream.Append(transformGeomToClip(pos, float3(0.0f, 0.0f, 0.5f), tipTransformMat, float2(0.5f, 1.0f)));
-
     					triangleStream.RestartStrip();
     				}
     			}
@@ -382,6 +374,8 @@ Shader "Custom/GrassShader"
 				float4 frag(GeometricData gIn) : SV_Target
 				{
 					float4 color = tex2D(_BladeTexture, gIn.uv);
+					if (color.z == 0 || color.a < 0.1f) discard;
+					
 	                color *= lerp(_BaseColor, _GrassTipColor, gIn.uv.y);
 	                
 	                // Get shadow attenuation
@@ -393,8 +387,9 @@ Shader "Custom/GrassShader"
 	                // Add ambient light to shadows
 	                shadow = max(shadow, _ShadowAmbient);
 	                
-	                // Apply modified shadows
-	                color.rgb *= shadow;
+	                // Apply lighting
+					float light = saturate(dot(normalize(_WorldSpaceLightPos0), gIn.normal)) * 0.5 + 0.5;
+					color *= (light) * _LightColor0 * shadow + float4(ShadeSH9(float4(gIn.normal, 1)), 1.0);
 	                
 	                return color;
 				}
@@ -409,8 +404,9 @@ Shader "Custom/GrassShader"
             Tags { "LightMode" = "ShadowCaster" }
             
             ZWrite On
-            ZTest LEqual
+			ZTest LEqual
             ColorMask 0
+			
             
             CGPROGRAM
             #pragma vertex geomVert
@@ -420,45 +416,44 @@ Shader "Custom/GrassShader"
             #pragma fragment fragShadow
             #pragma multi_compile_shadowcaster
             #pragma target 4.6
-            
+
+            #include <AutoLight.cginc>
+
             #include "UnityCG.cginc"
             
             #define UNITY_PI 3.14159265359f
             #define UNITY_TWO_PI 6.28318530718f
             #define BLADE_SEGMENTS 4
             
-            CBUFFER_START(UnityPerMaterial)
-			    float4 _BaseColor;
-			    float4 _GrassTipColor;
-			    sampler2D _BladeTexture;
+		    float4 _BaseColor;
+		    float4 _GrassTipColor;
+		    sampler2D _BladeTexture;
 
-			    float _BladeWidthMin;
-			    float _BladeWidthMax;
-			    float _BladeHeightMin;
-			    float _BladeHeightMax;
+		    float _BladeWidthMin;
+		    float _BladeWidthMax;
+		    float _BladeHeightMin;
+		    float _BladeHeightMax;
 
-    			int _BladeSegments;
-			    float _BladeBendDistance;
-			    float _BladeBendCurve;
+    		int _BladeSegments;
+		    float _BladeBendDistance;
+		    float _BladeBendCurve;
 
-			    float _BendDelta;
+		    float _BendDelta;
 
-			    float _TessellationGrassDistance;
+		    float _TessellationGrassDistance;
 
-			    sampler2D _GrassMap;
-			    float4 _GrassMap_ST;
-			    float _GrassThreshold;
-			    float _GrassFalloff;
+		    sampler2D _GrassMap;
+		    float4 _GrassMap_ST;
+		    float _GrassThreshold;
+		    float _GrassFalloff;
 
-			    sampler2D _WindMap;
-    			// Unity provides value for float4 with "_ST" suffix.
-    			// The x,y contains texture scale, and z,w contains translation (offset)
-			    float4 _WindMap_ST; 
-			    float4 _WindVelocity;
-			    float _WindFrequency;
+		    sampler2D _WindMap;
+		    float4 _WindMap_ST; 
+		    float4 _WindVelocity;
+		    float _WindFrequency;
 
-			    float4 _ShadowColor;
-            CBUFFER_END
+		    float4 _ShadowColor;
+            
             
             struct VertexInput
             {
@@ -620,13 +615,14 @@ Shader "Custom/GrassShader"
     		}
 
             
-            GeometricData transformGeomToClipShadow(float3 pos, float3 offset, float3x3 transformMat)
+            GeometricData transformGeomToClipShadow(float3 pos, float3 offset, float2 uv, float3x3 transformMat)
             {
                 GeometricData gOut;
                 float3 worldPos = pos + mul(transformMat, offset);
                 gOut.pos = UnityWorldToClipPos(worldPos);
                 gOut.pos = UnityApplyLinearShadowBias(gOut.pos);
-            	gOut.uv = float2(0.0, 0.0);
+            	gOut.uv = uv;
+            	
                 return gOut;
             }
             
@@ -687,7 +683,7 @@ Shader "Custom/GrassShader"
     					float height = lerp(_BladeHeightMin, _BladeHeightMax, rand(pos.zyx) * falloff);
     					float forward = rand(pos.yyz) * _BladeBendDistance;
 
-    					for (int i = 0; i < _BladeSegments; i++)
+    					for (int i = 0; i <= _BladeSegments; i++)
     					{
     						float t = i / (float)_BladeSegments;
     						float3 offset = float3(width * (1 - t), pow(t, _BladeBendCurve) * forward, height * t);
@@ -703,18 +699,9 @@ Shader "Custom/GrassShader"
 						    }
 
     						// Data for a single strip (for each 2 vertices)
-    						triangleStream.Append(transformGeomToClipShadow(pos, float3(offset.x, offset.y, offset.z), transformMat));
-    						triangleStream.Append(transformGeomToClipShadow(pos, float3(-offset.x, offset.y, offset.z), transformMat));
-    						
+    						triangleStream.Append(transformGeomToClipShadow(pos, float3(offset.x, offset.y, offset.z), float2(0, t), transformMat));
+    						triangleStream.Append(transformGeomToClipShadow(pos, float3(-offset.x, offset.y, offset.z), float2(1, t), transformMat));
     					}
-
-    					// Adding for the tip
-    					triangleStream.Append(transformGeomToClipShadow(pos, float3(0, forward, height), tipTransformMat));
-
-    					// Data for a single strip
-    					// triangleStream.Append(transformGeomToClip(pos, float3(-0.1f, 0.0f, 0.0f), baseTransformMat, float2(0.0f, 0.0f)));
-    					// triangleStream.Append(transformGeomToClip(pos, float3(0.1f, 0.0f, 0.0f), baseTransformMat, float2(1.0f, 0.0f)));
-    					// triangleStream.Append(transformGeomToClip(pos, float3(0.0f, 0.0f, 0.5f), tipTransformMat, float2(0.5f, 1.0f)));
 
     					triangleStream.RestartStrip();
     				}
@@ -723,6 +710,9 @@ Shader "Custom/GrassShader"
             float4 fragShadow(GeometricData i) : SV_Target
             {
                 //SHADOW_CASTER_FRAGMENT(i)
+				float4 color = tex2D(_BladeTexture, i.uv);
+            	if (color.z == 0 || color.a < 0.1f) discard;
+            	
             	return 0;
             }
             

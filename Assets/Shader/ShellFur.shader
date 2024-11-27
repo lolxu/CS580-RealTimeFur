@@ -5,15 +5,22 @@ Shader "Custom/ShellFur"
         _FurMap("Fur Map", 2D) = "white" {}
         _FurBaseMap("Base Map for Fur (color/texture etc...)", 2D) = "white" {}
         [IntRange] _ShellCount("Total Shell Amount", Range(1, 100)) = 16
-        _ShellLength("Shell Length/Step", Range(0.0, 1.0)) = 0.1
+        _ShellLength("Shell Length/Step", Range(0.0, 0.1)) = 0.01
         _Density("Sample Density", Range(0.0, 1.0)) = 1.0
         _AlphaCutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.15
         _FurColor("Fur Color", Color) = (1,1,1,1)
         _Occlusion("Fuir Occlusion Factor", Range(0.0, 1.0)) = 0.1 
         _RimLightPow("Rim light power", Float) = 1.0
-        _ShadowBias("Shadow Bias on Fur", Float) = 0.0
-        _ShadowExtraBias("Shadow extra bias", Float) = 0.0
         _ShellDirection("Base shell move direction", Vector) = (1.0, 1.0, 1.0, 1.0)
+        
+        // Shadows
+        _ShadowStrength("Shadow Strength", Range(0, 1)) = 0.5  // Lower value = less intense shadows
+        _ShadowAmbient("Shadow Ambient", Range(0, 1)) = 0.2
+        
+        // Wind...
+        _WindMap("Wind Map", 2D) = "white" {}
+        _WindVelocity("Wind Velocity", Vector) = (1, 0, 0, 0)
+		_WindFrequency("Wind Pulse Frequency", Range(0, 1)) = 0.01
     }
     SubShader
     {
@@ -56,11 +63,19 @@ Shader "Custom/ShellFur"
             float4 _ShellDirection;
             float4 _FurColor;
 
+            float _ShadowStrength;
+            float _ShadowAmbient;
+
             sampler2D _FurMap;
             sampler2D _FurBaseMap;
 
             float4 _FurMap_ST;
             float4 _FurBaseMap_ST;
+
+            sampler2D _WindMap;
+            float4 _WindMap_ST;
+            float4 _WindVelocity;
+            float _WindFrequency;
 
             // Other properties
             int _ShellInd;
@@ -83,6 +98,26 @@ Shader "Custom/ShellFur"
                 float3 viewDir : TEXCOORD6;
             };
 
+            // Construct a rotation matrix that rotates around the provided axis, sourced from:
+			// https://gist.github.com/keijiro/ee439d5e7388f3aafc5296005c8c3f33
+			float3x3 angleAxis3x3(float angle, float3 axis)
+			{
+				float c, s;
+				sincos(angle, s, c);
+
+				float t = 1 - c;
+				float x = axis.x;
+				float y = axis.y;
+				float z = axis.z;
+
+				return float3x3
+				(
+					t * x * x + c, t * x * y - s * z, t * x * z + s * y,
+					t * x * y + s * z, t * y * y + c, t * y * z - s * x,
+					t * x * z - s * y, t * y * z + s * x, t * z * z + c
+				);
+			}
+
             VertexData vert(VertexData v)
             {
                 return v;
@@ -101,8 +136,16 @@ Shader "Custom/ShellFur"
                 // Adding displacement
                 float displaceFactor = pow((float)index / _ShellCount, _ShellDirection.w);
 
+                // Sampling from wind texture
+    			float2 windUV = input.vertexPos.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
+    			float2 windSample = (tex2Dlod(_WindMap, float4(windUV, 0, 0)).xy * 2 - 1) * length(_WindVelocity);
+
+				// Wind Transforms
+    			float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
+    			float3x3 windMat = angleAxis3x3(UNITY_PI * windSample, windAxis) * ((float)index / _ShellCount);
+
                 float3 disp = displaceFactor * _ShellDirection.xyz;
-                float3 shellMoveDir = normalize(normalWorld + disp);
+                float3 shellMoveDir = mul(normalize(normalWorld + disp), windMat);
                 
                 float3 displaceWorldPos = worldPos + shellMoveDir * (_ShellLength * index);
                 
@@ -143,15 +186,18 @@ Shader "Custom/ShellFur"
 
                 float4 color = _FurColor * sampleTex;
 
-                // Lighting output with half-lambert shading
-                float ndotl = DotClamped(f.normal, _WorldSpaceLightPos0) * 0.5f + 0.5f;
-                ndotl = ndotl * ndotl;
-
                 // Darkening roots
                 float occlusionFactor = lerp(1.0 - _Occlusion, 1.0, f.layer);
 
                 // Receiving shadows
                 half shadow = SHADOW_ATTENUATION(f);
+
+                // Make shadows less intense by lerping with 1
+                shadow = lerp(1, shadow, _ShadowStrength);
+	                
+                // Add ambient light to shadows
+                shadow = max(shadow, _ShadowAmbient);
+                
                 float light = saturate(dot(normalize(_WorldSpaceLightPos0), f.normal)) * 0.5 + 0.5;
                 half rim = pow(1.0 - saturate(dot(normalize(f.viewDir), f.normal)), _RimLightPow);
                 color *= (light + rim) * _LightColor0 * shadow + float4(ShadeSH9(float4(f.normal, 1)), 1.0);
@@ -193,7 +239,6 @@ Shader "Custom/ShellFur"
             float _DisplacementStength;
             float _AlphaCutoff;
             float _Occlusion;
-            float _ShadowBias;
             float4 _ShellDirection;
             float4 _FurColor;
 
@@ -202,6 +247,11 @@ Shader "Custom/ShellFur"
 
             float4 _FurMap_ST;
             float4 _FurBaseMap_ST;
+
+            sampler2D _WindMap;
+            float4 _WindMap_ST;
+            float4 _WindVelocity;
+            float _WindFrequency;
 
             // Other properties
             int _ShellInd;
@@ -221,6 +271,26 @@ Shader "Custom/ShellFur"
                 float layer : TEXCOORD2;
             };
 
+            // Construct a rotation matrix that rotates around the provided axis, sourced from:
+			// https://gist.github.com/keijiro/ee439d5e7388f3aafc5296005c8c3f33
+			float3x3 angleAxis3x3(float angle, float3 axis)
+			{
+				float c, s;
+				sincos(angle, s, c);
+
+				float t = 1 - c;
+				float x = axis.x;
+				float y = axis.y;
+				float z = axis.z;
+
+				return float3x3
+				(
+					t * x * x + c, t * x * y - s * z, t * x * z + s * y,
+					t * x * y + s * z, t * y * y + c, t * y * z - s * x,
+					t * x * z - s * y, t * y * z + s * x, t * z * z + c
+				);
+			}
+
             VertexData vert(VertexData v)
             {
                 return v;
@@ -239,8 +309,16 @@ Shader "Custom/ShellFur"
                 // Apply shell displacement
                 float displaceFactor = pow((float)index / _ShellCount, _ShellDirection.w);
 
+                // Sampling from wind texture
+    			float2 windUV = input.vertexPos.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
+    			float2 windSample = (tex2Dlod(_WindMap, float4(windUV, 0, 0)).xy * 2 - 1) * length(_WindVelocity);
+
+				// Wind Transforms
+    			float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
+    			float3x3 windMat = angleAxis3x3(UNITY_PI * windSample, windAxis) * ((float)index / _ShellCount);
+
                 float3 disp = displaceFactor * _ShellDirection.xyz;
-                float3 shellMoveDir = normalize(normalWorld + disp);
+                float3 shellMoveDir = mul(normalize(normalWorld + disp), windMat);
                 
                 float3 displaceWorldPos = worldPos + shellMoveDir * (_ShellLength * index);
 
@@ -276,7 +354,7 @@ Shader "Custom/ShellFur"
                 // Making fur strands darker and thinner deeper it goes
                 if (f.layer > 0.0f && alpha.r < _AlphaCutoff) discard;
 
-                return f.pos.z / f.pos.w;
+                SHADOW_CASTER_FRAGMENT(f);
             }
             ENDCG
         }
