@@ -27,17 +27,21 @@ public class RaycastHitTriangle : MonoBehaviour
         Mesh mesh = meshCollider.sharedMesh;
         Vector3[] vertices = mesh.vertices;
         Vector2[] uv2 = new Vector2[vertices.Length]; //holds (x, y)
-        Vector2[] uv3 = new Vector2[vertices.Length]; //holds (z, w)
+        Vector2[] uv3 = new Vector2[vertices.Length]; //holds (z, w) w = bendFactor
         int[] triangles = mesh.triangles;
         Transform hitTransform = hit.collider.transform;
         Vector3 hitLocalPos = hitTransform.InverseTransformPoint(hit.point);
         float sphereRadius = 1.5f;
+        Vector3 p0 = vertices[triangles[hit.triangleIndex * 3 + 0]];
+        Vector3 p1 = vertices[triangles[hit.triangleIndex * 3 + 1]];
+        Vector3 p2 = vertices[triangles[hit.triangleIndex * 3 + 2]];
+        Vector3 trianglesCenter = (p0 + p1 + p2) / 3;
         List<int> trianglesInsideSphereIndexList = GetTrianglesInsideSphere(vertices, triangles, hitLocalPos, sphereRadius);
         foreach (int i in trianglesInsideSphereIndexList)
         {
-            Vector3 p0 = vertices[triangles[i + 0]];
-            Vector3 p1 = vertices[triangles[i + 1]];
-            Vector3 p2 = vertices[triangles[i + 2]];
+            p0 = vertices[triangles[i + 0]];
+            p1 = vertices[triangles[i + 1]];
+            p2 = vertices[triangles[i + 2]];
             
             Vector3 wP0 = hitTransform.TransformPoint(p0);
             Vector3 wP1 = hitTransform.TransformPoint(p1);
@@ -47,17 +51,16 @@ public class RaycastHitTriangle : MonoBehaviour
             Debug.DrawLine(wP2, wP0);
             
             //displace vertices away from the hit point
-            Vector3 triangleCenter = (p0 + p1 + p2) / 3;
-            float minimumFactor = 2f, additionalFactor = 4f;
+            float bendFactor = 5f;
             Vector3 newP0 = (p0 - hitLocalPos).normalized;
             Vector3 newP1 = (p1 - hitLocalPos).normalized;
             Vector3 newP2 = (p2 - hitLocalPos).normalized;
             uv2[triangles[i + 0]] = newP0;
             uv2[triangles[i + 1]] = newP1;
             uv2[triangles[i + 2]] = newP2;
-            uv3[triangles[i + 0]] = new Vector2(newP0.z, minimumFactor + additionalFactor * (1 - Mathf.Clamp(Vector3.Distance(hitLocalPos, p0) / Vector3.Distance(triangleCenter, p0), 0, 1)));
-            uv3[triangles[i + 1]] = new Vector2(newP1.z, minimumFactor + additionalFactor * (1 - Mathf.Clamp(Vector3.Distance(hitLocalPos, p1) / Vector3.Distance(triangleCenter, p1), 0, 1)));
-            uv3[triangles[i + 2]] = new Vector2(newP2.z, minimumFactor + additionalFactor * (1 - Mathf.Clamp(Vector3.Distance(hitLocalPos, p2) / Vector3.Distance(triangleCenter, p2), 0, 1)));
+            uv3[triangles[i + 0]] = new Vector2(newP0.z, bendFactor * (1 - Mathf.Clamp(Vector3.Distance(trianglesCenter, p0) / sphereRadius, 0, 1)));
+            uv3[triangles[i + 1]] = new Vector2(newP1.z, bendFactor * (1 - Mathf.Clamp(Vector3.Distance(trianglesCenter, p1) / sphereRadius, 0, 1)));
+            uv3[triangles[i + 2]] = new Vector2(newP2.z, bendFactor * (1 - Mathf.Clamp(Vector3.Distance(trianglesCenter, p2) / sphereRadius, 0, 1)));
         }
         
         mesh.uv2 = uv2;
