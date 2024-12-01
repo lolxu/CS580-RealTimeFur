@@ -48,10 +48,10 @@ public class RaycastHitTriangle : MonoBehaviour
             
             //displace vertices away from the hit point
             Vector3 triangleCenter = (p0 + p1 + p2) / 3;
-            float minimumFactor = 2f, additionalFactor = 5f;
-            Vector3 newP0 = (p0 - triangleCenter).normalized;
-            Vector3 newP1 = (p1 - triangleCenter).normalized;
-            Vector3 newP2 = (p2 - triangleCenter).normalized;
+            float minimumFactor = 2f, additionalFactor = 4f;
+            Vector3 newP0 = (p0 - hitLocalPos).normalized;
+            Vector3 newP1 = (p1 - hitLocalPos).normalized;
+            Vector3 newP2 = (p2 - hitLocalPos).normalized;
             uv2[triangles[i + 0]] = newP0;
             uv2[triangles[i + 1]] = newP1;
             uv2[triangles[i + 2]] = newP2;
