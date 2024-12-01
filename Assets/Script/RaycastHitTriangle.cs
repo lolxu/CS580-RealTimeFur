@@ -7,6 +7,8 @@ using System.Linq;
 
 public class RaycastHitTriangle : MonoBehaviour
 {
+    public float m_bendFactor = 5.0f;
+    
     Camera cam;
 
     void Start()
@@ -51,16 +53,15 @@ public class RaycastHitTriangle : MonoBehaviour
             Debug.DrawLine(wP2, wP0);
             
             //displace vertices away from the hit point
-            float bendFactor = 5f;
             Vector3 newP0 = (p0 - hitLocalPos).normalized;
             Vector3 newP1 = (p1 - hitLocalPos).normalized;
             Vector3 newP2 = (p2 - hitLocalPos).normalized;
             uv2[triangles[i + 0]] = newP0;
             uv2[triangles[i + 1]] = newP1;
             uv2[triangles[i + 2]] = newP2;
-            uv3[triangles[i + 0]] = new Vector2(newP0.z, bendFactor * (1 - Mathf.Clamp(Vector3.Distance(trianglesCenter, p0) / sphereRadius, 0, 1)));
-            uv3[triangles[i + 1]] = new Vector2(newP1.z, bendFactor * (1 - Mathf.Clamp(Vector3.Distance(trianglesCenter, p1) / sphereRadius, 0, 1)));
-            uv3[triangles[i + 2]] = new Vector2(newP2.z, bendFactor * (1 - Mathf.Clamp(Vector3.Distance(trianglesCenter, p2) / sphereRadius, 0, 1)));
+            uv3[triangles[i + 0]] = new Vector2(newP0.z, m_bendFactor * (1 - Mathf.Clamp(Vector3.Distance(trianglesCenter, p0) / sphereRadius, 0, 1)));
+            uv3[triangles[i + 1]] = new Vector2(newP1.z, m_bendFactor * (1 - Mathf.Clamp(Vector3.Distance(trianglesCenter, p1) / sphereRadius, 0, 1)));
+            uv3[triangles[i + 2]] = new Vector2(newP2.z, m_bendFactor * (1 - Mathf.Clamp(Vector3.Distance(trianglesCenter, p2) / sphereRadius, 0, 1)));
         }
         
         mesh.uv2 = uv2;
