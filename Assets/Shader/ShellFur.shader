@@ -132,7 +132,7 @@ Shader "Custom/ShellFur"
                 float3 vertexInput = input.vertexPos.xyz;
                 float3 normalInput = input.normal;
 
-                float3 worldPos = mul(unity_ObjectToWorld, float4(vertexInput, 1.0f)).xyz + float3(input.uv2, input.uv3.x);
+                float3 worldPos = mul(unity_ObjectToWorld, float4(vertexInput, 1.0f)).xyz;
                 float3 normalWorld = normalize(UnityObjectToWorldNormal(normalInput));
 
                 // Adding displacement
@@ -146,7 +146,7 @@ Shader "Custom/ShellFur"
     			float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
     			float3x3 windMat = angleAxis3x3(UNITY_PI * windSample, windAxis) * ((float)index / _ShellCount);
 
-                float3 disp = displaceFactor * _ShellDirection.xyz;
+                float3 disp = displaceFactor * (_ShellDirection.xyz + float3(input.uv2, input.uv3.x) * input.uv3.y);
                 float3 shellMoveDir = mul(normalize(normalWorld + disp), windMat);
                 
                 float3 displaceWorldPos = worldPos + shellMoveDir * (_ShellLength * index);
@@ -307,7 +307,7 @@ Shader "Custom/ShellFur"
                 float3 vertexInput = input.vertexPos.xyz;
                 float3 normalInput = input.normal;
 
-                float3 worldPos = mul(unity_ObjectToWorld, float4(vertexInput, 1.0f)).xyz  + float3(input.uv2, input.uv3.x);
+                float3 worldPos = mul(unity_ObjectToWorld, float4(vertexInput, 1.0f)).xyz;
                 float3 normalWorld = normalize(UnityObjectToWorldNormal(normalInput));
 
                 // Apply shell displacement
@@ -321,7 +321,7 @@ Shader "Custom/ShellFur"
     			float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
     			float3x3 windMat = angleAxis3x3(UNITY_PI * windSample, windAxis) * ((float)index / _ShellCount);
 
-                float3 disp = displaceFactor * _ShellDirection.xyz;
+                float3 disp = displaceFactor * (_ShellDirection.xyz + float3(input.uv2, input.uv3.x) * input.uv3.y);
                 float3 shellMoveDir = mul(normalize(normalWorld + disp), windMat);
                 
                 float3 displaceWorldPos = worldPos + shellMoveDir * (_ShellLength * index);
