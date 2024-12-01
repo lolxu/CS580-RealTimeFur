@@ -85,6 +85,8 @@ Shader "Custom/ShellFur"
                 float4 vertexPos : POSITION;
                 float3 normal : NORMAL;
                 float2 uv : TEXCOORD0;
+                float2 uv2 : TEXCOORD1;
+                float2 uv3 : TEXCOORD2;
             };
 
             struct VertexToFrag
@@ -130,7 +132,7 @@ Shader "Custom/ShellFur"
                 float3 vertexInput = input.vertexPos.xyz;
                 float3 normalInput = input.normal;
 
-                float3 worldPos = mul(unity_ObjectToWorld, float4(vertexInput, 1.0f)).xyz;
+                float3 worldPos = mul(unity_ObjectToWorld, float4(vertexInput, 1.0f)).xyz + float3(input.uv2, input.uv3.x);
                 float3 normalWorld = normalize(UnityObjectToWorldNormal(normalInput));
 
                 // Adding displacement
@@ -261,6 +263,8 @@ Shader "Custom/ShellFur"
                 float4 vertexPos : POSITION;
                 float3 normal : NORMAL;
                 float2 uv : TEXCOORD0;
+                float2 uv2 : TEXCOORD1;
+                float2 uv3 : TEXCOORD2;
             };
 
             struct VertexToFrag
@@ -303,7 +307,7 @@ Shader "Custom/ShellFur"
                 float3 vertexInput = input.vertexPos.xyz;
                 float3 normalInput = input.normal;
 
-                float3 worldPos = mul(unity_ObjectToWorld, float4(vertexInput, 1.0f)).xyz;
+                float3 worldPos = mul(unity_ObjectToWorld, float4(vertexInput, 1.0f)).xyz  + float3(input.uv2, input.uv3.x);
                 float3 normalWorld = normalize(UnityObjectToWorldNormal(normalInput));
 
                 // Apply shell displacement
