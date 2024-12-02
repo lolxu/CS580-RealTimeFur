@@ -1,12 +1,12 @@
 // This script draws a debug line around mesh triangles
 // as you move the mouse over them.
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 public class RaycastHitTriangle : MonoBehaviour
 {
+    public float m_sphereRadius = 1.5f;
     public float m_bendFactor = 5.0f;
     
     Camera cam;
@@ -33,12 +33,11 @@ public class RaycastHitTriangle : MonoBehaviour
         int[] triangles = mesh.triangles;
         Transform hitTransform = hit.collider.transform;
         Vector3 hitLocalPos = hitTransform.InverseTransformPoint(hit.point);
-        float sphereRadius = 1.5f;
         Vector3 p0 = vertices[triangles[hit.triangleIndex * 3 + 0]];
         Vector3 p1 = vertices[triangles[hit.triangleIndex * 3 + 1]];
         Vector3 p2 = vertices[triangles[hit.triangleIndex * 3 + 2]];
         Vector3 trianglesCenter = (p0 + p1 + p2) / 3;
-        List<int> trianglesInsideSphereIndexList = GetTrianglesInsideSphere(vertices, triangles, hitLocalPos, sphereRadius);
+        List<int> trianglesInsideSphereIndexList = GetTrianglesInsideSphere(vertices, triangles, hitLocalPos, m_sphereRadius);
         foreach (int i in trianglesInsideSphereIndexList)
         {
             p0 = vertices[triangles[i + 0]];
@@ -59,9 +58,9 @@ public class RaycastHitTriangle : MonoBehaviour
             uv2[triangles[i + 0]] = newP0;
             uv2[triangles[i + 1]] = newP1;
             uv2[triangles[i + 2]] = newP2;
-            uv3[triangles[i + 0]] = new Vector2(newP0.z, m_bendFactor * (1 - Mathf.Clamp(Vector3.Distance(trianglesCenter, p0) / sphereRadius, 0, 1)));
-            uv3[triangles[i + 1]] = new Vector2(newP1.z, m_bendFactor * (1 - Mathf.Clamp(Vector3.Distance(trianglesCenter, p1) / sphereRadius, 0, 1)));
-            uv3[triangles[i + 2]] = new Vector2(newP2.z, m_bendFactor * (1 - Mathf.Clamp(Vector3.Distance(trianglesCenter, p2) / sphereRadius, 0, 1)));
+            uv3[triangles[i + 0]] = new Vector2(newP0.z, m_bendFactor * (1 - Mathf.Clamp(Vector3.Distance(trianglesCenter, p0) / m_sphereRadius, 0, 1)));
+            uv3[triangles[i + 1]] = new Vector2(newP1.z, m_bendFactor * (1 - Mathf.Clamp(Vector3.Distance(trianglesCenter, p1) / m_sphereRadius, 0, 1)));
+            uv3[triangles[i + 2]] = new Vector2(newP2.z, m_bendFactor * (1 - Mathf.Clamp(Vector3.Distance(trianglesCenter, p2) / m_sphereRadius, 0, 1)));
         }
         
         mesh.uv2 = uv2;
