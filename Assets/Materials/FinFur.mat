@@ -94,12 +94,12 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _ShadowAmbient: 0.328
-    - _ShadowStrength: 0.401
+    - _ShadowAmbient: 0.3
+    - _ShadowStrength: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TessellationGrassDistance: 0.08
+    - _TessellationGrassDistance: 0.1
     - _UVSec: 0
     - _WindFrequency: 0.005
     - _ZWrite: 1
