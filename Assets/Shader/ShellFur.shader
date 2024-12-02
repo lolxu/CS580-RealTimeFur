@@ -85,6 +85,8 @@ Shader "Custom/ShellFur"
                 float4 vertexPos : POSITION;
                 float3 normal : NORMAL;
                 float2 uv : TEXCOORD0;
+                float2 uv2 : TEXCOORD1;
+                float2 uv3 : TEXCOORD2;
             };
 
             struct VertexToFrag
@@ -144,7 +146,7 @@ Shader "Custom/ShellFur"
     			float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
     			float3x3 windMat = angleAxis3x3(UNITY_PI * windSample, windAxis) * ((float)index / _ShellCount);
 
-                float3 disp = displaceFactor * _ShellDirection.xyz;
+                float3 disp = displaceFactor * (_ShellDirection.xyz + float3(input.uv2, input.uv3.x) * input.uv3.y);
                 float3 shellMoveDir = mul(normalize(normalWorld + disp), windMat);
                 
                 float3 displaceWorldPos = worldPos + shellMoveDir * (_ShellLength * index);
@@ -261,6 +263,8 @@ Shader "Custom/ShellFur"
                 float4 vertexPos : POSITION;
                 float3 normal : NORMAL;
                 float2 uv : TEXCOORD0;
+                float2 uv2 : TEXCOORD1;
+                float2 uv3 : TEXCOORD2;
             };
 
             struct VertexToFrag
@@ -317,7 +321,7 @@ Shader "Custom/ShellFur"
     			float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
     			float3x3 windMat = angleAxis3x3(UNITY_PI * windSample, windAxis) * ((float)index / _ShellCount);
 
-                float3 disp = displaceFactor * _ShellDirection.xyz;
+                float3 disp = displaceFactor * (_ShellDirection.xyz + float3(input.uv2, input.uv3.x) * input.uv3.y);
                 float3 shellMoveDir = mul(normalize(normalWorld + disp), windMat);
                 
                 float3 displaceWorldPos = worldPos + shellMoveDir * (_ShellLength * index);
