@@ -278,10 +278,8 @@ Shader "Custom/FurGeomShader"
 					gOut.pos = UnityWorldToClipPos(pos + mul(transformMat, offset));
     				
     				gOut.uv = uv;
-    				// gOut.worldPos = mul(unity_ObjectToWorld, (pos + mul(transformMat, offset)));
-    				// gOut.worldPos = TransformWorldToHClip(pos + mul(transformMat, offset));
     				gOut.worldPos = pos;
-					gOut.normal = UnityObjectToWorldNormal(normal);
+					gOut.normal = normal;
 
     				TRANSFER_SHADOW(gOut);
     				

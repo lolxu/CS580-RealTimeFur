@@ -279,7 +279,7 @@ Shader "Custom/FinShader"
 					gOut.pos = UnityWorldToClipPos(pos + mul(transformMat, offset));
     				gOut.uv = uv;
     				gOut.worldPos = pos;
-					gOut.normal = UnityObjectToWorldNormal(normal);
+					gOut.normal = normal;
 
     				TRANSFER_SHADOW(gOut);
     				

@@ -80,16 +80,16 @@ Material:
     - _BendDelta: 0
     - _BladeBendCurve: 3.21
     - _BladeBendDistance: 0.5
-    - _BladeHeightMax: 0.57
-    - _BladeHeightMin: 0.39
+    - _BladeHeightMax: 0.5
+    - _BladeHeightMin: 0.2
     - _BladeSegments: 4
-    - _BladeWidthMax: 0.2
+    - _BladeWidthMax: 0.3
     - _BladeWidthMin: 0.2
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _FurFalloff: 0.08
+    - _FurFalloff: 0.2
     - _FurThreshold: 0.5
     - _GlossMapScale: 1
     - _Glossiness: 0.5
@@ -107,7 +107,7 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TessellationFurDistance: 0.08
+    - _TessellationFurDistance: 0.1
     - _TessellationGrassDistance: 0.11
     - _UVSec: 0
     - _WindFrequency: 0.01
