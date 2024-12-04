@@ -31,6 +31,11 @@ Shader "Custom/FurGeomShader"
         _ShadowAmbient("Shadow Ambient", Range(0, 1)) = 0.2
     	
     	_FurDirection("Base fur move direction", Vector) = (1.0, 1.0, 1.0)
+    	
+    	// Fur interactions
+    	_InteractionPoint("Interaction Point", Vector) = (0, -9999, 0, 0)
+		_InteractionRadius("Interaction Radius", float) = 0.0
+    	_InteractionStrength("Interaction Strength", float) = 0.0
     }
     SubShader
     {		
@@ -109,6 +114,10 @@ Shader "Custom/FurGeomShader"
 				float _ShadowAmbient;
 
 				float3 _FurDirection;
+
+				float4 _InteractionPoint;
+				float _InteractionRadius;
+				float _InteractionStrength;
 
     			// Simple noise function, sourced from http://answers.unity.com/answers/624136/view.html
 				// Extended discussion on this function can be found at the following link:
@@ -295,14 +304,12 @@ Shader "Custom/FurGeomShader"
     			[maxvertexcount(BLADE_SEGMENTS * 2 + 1)] 
     			void geom(point VertexOutput input[1], inout TriangleStream<GeometricData> triangleStream)
     			{
-
 					// Read from the Fur Map texture
     				float FurVisibility = tex2Dlod(_FurMap, float4(input[0].uv, 0, 0)).r;
 
     				// Check if the Fur needs to spawn or not
     				if (FurVisibility >= _FurThreshold)
     				{
-    				
     					float3 pos = input[0].vertex.xyz;
     					float3 normal = input[0].normal;
     					float4 tangent = input[0].tangent;
@@ -320,9 +327,15 @@ Shader "Custom/FurGeomShader"
     					float seed = rand(pos);
     					float3x3 randRotateMat = angleAxis3x3(seed * UNITY_TWO_PI, float3(0, 0, 1.0f));
 
-    					// Rotate around the bottom of the blade by some random amount
+						// Calculate distance and direction to interaction point in world space
+						float distToInteraction = distance(pos, _InteractionPoint.xyz);
+						float interactionInfluence = 1 - saturate(distToInteraction / _InteractionRadius);
+						interactionInfluence = smoothstep(0, 1, interactionInfluence);
+
+						// Modify bend direction based on interaction
     					float3 bendAxis = normalize(_FurDirection);
-    					float3x3 randBendMat = angleAxis3x3(_BendDelta * UNITY_PI * clamp(dot(UnityObjectToWorldNormal(normal), bendAxis) * 2.0f, -2.0f, -0.5f), bendAxis);
+						float bendAmount = lerp(_BendDelta, _BendDelta + _InteractionStrength, interactionInfluence);
+						float3x3 randBendMat = angleAxis3x3(bendAmount * UNITY_PI, bendAxis);
 
     					// Sampling from wind texture
     					float2 windUV = pos.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
@@ -450,6 +463,10 @@ Shader "Custom/FurGeomShader"
 		    float4 _ShadowColor;
 
             float3 _FurDirection;
+
+            float4 _InteractionPoint;
+			float _InteractionRadius;
+			float _InteractionStrength;
             
             struct VertexInput
             {
@@ -651,10 +668,16 @@ Shader "Custom/FurGeomShader"
     					float seed = rand(pos);
     					float3x3 randRotateMat = angleAxis3x3(seed * UNITY_TWO_PI, float3(0, 0, 1.0f));
 
-    					// Rotate around the bottom of the blade by some random amount
-    					float3 bendAxis = normalize(_FurDirection);
-						float3x3 randBendMat = angleAxis3x3(_BendDelta * UNITY_PI * clamp(dot(UnityObjectToWorldNormal(normal), bendAxis) * 2.0f, -2.0f, -0.5f), bendAxis);
+						// Calculate distance and direction to interaction point in world space
+						float distToInteraction = distance(pos, _InteractionPoint.xyz);
+						float interactionInfluence = 1 - saturate(distToInteraction / _InteractionRadius);
+						interactionInfluence = smoothstep(0, 1, interactionInfluence);
 
+						// Modify bend direction based on interaction
+    					float3 bendAxis = normalize(_FurDirection);
+						float bendAmount = lerp(_BendDelta, _BendDelta + _InteractionStrength, interactionInfluence);
+						float3x3 randBendMat = angleAxis3x3(bendAmount * UNITY_PI, bendAxis);
+    					
     					// Sampling from wind texture
     					float2 windUV = pos.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
     					float2 windSample = (tex2Dlod(_WindMap, float4(windUV, 0, 0)).xy * 2 - 1) * length(_WindVelocity);

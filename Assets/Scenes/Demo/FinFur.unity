@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 405227973}
   - component: {fileID: 405227972}
   - component: {fileID: 405227971}
+  - component: {fileID: 405227975}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -229,6 +230,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -2.298, y: 112.986, z: 0.237}
+--- !u!114 &405227975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 405227970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0d7638f648a86d468138e15fdab4a97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_interactionRadius: 1
+  m_bendStrength: 0.7
+  m_interactionLayer:
+    serializedVersion: 2
+    m_Bits: 1
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -440,6 +458,7 @@ GameObject:
   - component: {fileID: 826414683}
   - component: {fileID: 826414682}
   - component: {fileID: 826414681}
+  - component: {fileID: 826414685}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -535,6 +554,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &826414685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 826414680}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0d7638f648a86d468138e15fdab4a97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_interactionRadius: 2
+  m_bendStrength: 0.7
+  m_interactionLayer:
+    serializedVersion: 2
+    m_Bits: 1
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -640,8 +676,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 804c4faf63edd8d40af2a77b25ec740e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_moveSpeed: 5
-  m_turnSpeed: 45
+  m_moveSpeed: 10
+  m_turnSpeed: 60
 --- !u!1 &2056209017
 GameObject:
   m_ObjectHideFlags: 0

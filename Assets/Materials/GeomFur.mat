@@ -77,14 +77,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BendDelta: 0
+    - _BendDelta: 0.05
     - _BladeBendCurve: 3
     - _BladeBendDistance: 0.1
     - _BladeHeightMax: 0.55
     - _BladeHeightMin: 0.28
     - _BladeSegments: 4
-    - _BladeWidthMax: 0.0912
-    - _BladeWidthMin: 0.0801
+    - _BladeWidthMax: 0.1
+    - _BladeWidthMin: 0.0904
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
@@ -96,6 +96,9 @@ Material:
     - _GlossyReflections: 1
     - _GrassFalloff: 0
     - _GrassThreshold: 0
+    - _InteractionParams: 1
+    - _InteractionRadius: 1
+    - _InteractionStrength: 1
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -105,7 +108,7 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TessellationFurDistance: 0.04
+    - _TessellationFurDistance: 0.03
     - _TessellationGrassDistance: 0.025
     - _UVSec: 0
     - _WindFrequency: 0.05
@@ -117,5 +120,7 @@ Material:
     - _FurDirection: {r: 0, g: -1, b: 0, a: 0}
     - _FurTipColor: {r: 1, g: 1, b: 1, a: 1}
     - _GrassTipColor: {r: 1, g: 1, b: 1, a: 1}
+    - _InteractionParams: {r: 1, g: 1, b: 0, a: 0}
+    - _InteractionPoint: {r: 0, g: -9999, b: 0, a: 0}
     - _WindVelocity: {r: 0.05, g: 0, b: 0.05, a: 0}
   m_BuildTextureStacks: []
