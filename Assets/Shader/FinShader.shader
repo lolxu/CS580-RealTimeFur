@@ -397,7 +397,7 @@ Shader "Custom/FinShader"
 	                shadow = max(shadow, _ShadowAmbient);
 	                
 	                // Apply lighting - half lambert
-					float light = saturate(dot(normalize(_WorldSpaceLightPos0), gIn.normal)) * 0.5 + 0.5;
+					float light = pow(saturate(dot(normalize(_WorldSpaceLightPos0), gIn.normal)) * 0.5 + 0.5, 2.0);
 					color *= (light) * _LightColor0 * shadow + float4(ShadeSH9(float4(gIn.normal, 1)), 1.0);
 	                
 	                return color;
