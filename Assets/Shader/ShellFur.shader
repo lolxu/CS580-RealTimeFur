@@ -144,7 +144,7 @@ Shader "Custom/ShellFur"
 
 				// Wind Transforms
     			float3 windAxis = normalize(float3(windSample.x, windSample.y, 0));
-    			float3x3 windMat = angleAxis3x3(UNITY_PI * windSample, windAxis) * ((float)index / _ShellCount);
+    			float3x3 windMat = angleAxis3x3(UNITY_PI * windSample.x, windAxis) * ((float)index / _ShellCount);
 
                 float3 disp = displaceFactor * (_ShellDirection.xyz + float3(input.uv2, input.uv3.x) * input.uv3.y);
                 float3 shellMoveDir = mul(normalize(normalWorld + disp), windMat);
