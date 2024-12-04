@@ -304,7 +304,7 @@ Shader "Custom/FinShader"
 
     					float3 bitangent = cross(normal, tangent.xyz) * tangent.w;
 
-    					float3x3 tangentToLocal = float3x3
+    					float3x3 tangentToWorld = float3x3
     					(
     						tangent.x, bitangent.x, normal.x,
     						tangent.y, bitangent.y, normal.y,
@@ -334,8 +334,8 @@ Shader "Custom/FinShader"
     					float3x3 windMat = angleAxis3x3(UNITY_PI * windSample, windAxis);
 
     					// Transform matrices for base and tip of a blade
-    					float3x3 baseTransformMat = mul(tangentToLocal, randRotateMat);
-    					float3x3 tipTransformMat = mul(mul(mul(tangentToLocal, windMat), randBendMat), randRotateMat);
+    					float3x3 baseTransformMat = mul(tangentToWorld, randRotateMat);
+    					float3x3 tipTransformMat = mul(mul(mul(tangentToWorld, windMat), randBendMat), randRotateMat);
     					
 						float falloff = smoothstep(_FurThreshold, _FurThreshold + _FurFalloff, FurVisibility);
     					
@@ -629,7 +629,7 @@ Shader "Custom/FinShader"
 
     					float3 bitangent = cross(normal, tangent.xyz) * tangent.w;
 
-    					float3x3 tangentToLocal = float3x3
+    					float3x3 tangentToWorld = float3x3
     					(
     						tangent.x, bitangent.x, normal.x,
     						tangent.y, bitangent.y, normal.y,
@@ -659,8 +659,8 @@ Shader "Custom/FinShader"
     					float3x3 windMat = angleAxis3x3(UNITY_PI * windSample, windAxis);
 
     					// Transform matrices for base and tip of a blade
-    					float3x3 baseTransformMat = mul(tangentToLocal, randRotateMat);
-    					float3x3 tipTransformMat = mul(mul(mul(tangentToLocal, windMat), randBendMat), randRotateMat);
+    					float3x3 baseTransformMat = mul(tangentToWorld, randRotateMat);
+    					float3x3 tipTransformMat = mul(mul(mul(tangentToWorld, windMat), randBendMat), randRotateMat);
     					
 						float falloff = smoothstep(_FurThreshold, _FurThreshold + _FurFalloff, FurVisibility);
     					
