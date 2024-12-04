@@ -183,18 +183,6 @@ Shader "Custom/FinShader"
     				float inside : SV_InsideTessFactor;
     			};
 
-    			// Simple vertex shader
-    			VertexOutput vert(VertexInput vIn)
-    			{
-    				VertexOutput vOut;
-    				vOut.vertex = UnityObjectToClipPos(vIn.vertex.xyz);
-    				vOut.normal = vIn.normal;
-    				vOut.tangent = vIn.tangent;
-    				vOut.uv = TRANSFORM_TEX(vIn.uv, _FurMap);
-    				
-    				return vOut;
-    			}
-
     			// Tesselation Vertex, just copies everything
     			VertexOutput tessVert(VertexInput vIn)
     			{
@@ -522,22 +510,6 @@ Shader "Custom/FinShader"
                     t * x * z - s * y, t * y * z + s * x, t * z * z + c
                 );
             }
-            
-            // Copy your existing tessellation functions here
-            // (tessVert, tesselationEdgeFactor, patchConstantFunc, hull, domain)
-            // ...
-
-            // Simple vertex shader
-    		VertexOutput vert(VertexInput vIn)
-    		{
-    			VertexOutput vOut;
-    			vOut.vertex = UnityObjectToClipPos(vIn.vertex.xyz);
-    			vOut.normal = vIn.normal;
-    			vOut.tangent = vIn.tangent;
-    			vOut.uv = TRANSFORM_TEX(vIn.uv, _FurMap);
-    			
-    			return vOut;
-    		}
 
     		// Tesselation Vertex, just copies everything
     		VertexOutput tessVert(VertexInput vIn)
