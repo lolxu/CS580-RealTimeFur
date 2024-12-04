@@ -30,6 +30,15 @@ public class RaycastHitTriangle : MonoBehaviour
         Vector3[] vertices = mesh.vertices;
         Vector2[] uv2 = new Vector2[vertices.Length]; //holds (x, y)
         Vector2[] uv3 = new Vector2[vertices.Length]; //holds (z, w) w = bendFactor
+        
+        // Reset interaction when mouse button is not pressed
+        if (!Input.GetMouseButton(0))
+        {
+            mesh.uv2 = uv2;
+            mesh.uv3 = uv3;
+            return;
+        }
+        
         int[] triangles = mesh.triangles;
         Transform hitTransform = hit.collider.transform;
         Vector3 hitLocalPos = hitTransform.InverseTransformPoint(hit.point);
