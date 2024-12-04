@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: TouchGrass
+  m_Name: GeomFur
   m_Shader: {fileID: 4800000, guid: cc7d230ed7b4b574f94d2e3a263ad2cf, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -19,7 +19,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
-  m_LockedProperties: 
+  m_LockedProperties: _BladeBendCurve
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -44,6 +44,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FurMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -73,18 +77,20 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BendDelta: 0.2
-    - _BladeBendCurve: 2.47
-    - _BladeBendDistance: 0.38
-    - _BladeHeightMax: 1.03
-    - _BladeHeightMin: 0.44
+    - _BendDelta: 0
+    - _BladeBendCurve: 3
+    - _BladeBendDistance: 0.1
+    - _BladeHeightMax: 0.55
+    - _BladeHeightMin: 0.28
     - _BladeSegments: 4
-    - _BladeWidthMax: 0.0467
-    - _BladeWidthMin: 0.0233
+    - _BladeWidthMax: 0.0912
+    - _BladeWidthMin: 0.0801
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
+    - _FurFalloff: 0
+    - _FurThreshold: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
@@ -94,19 +100,22 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _ShadowAmbient: 0
-    - _ShadowStrength: 0.356
+    - _ShadowAmbient: 0.105
+    - _ShadowStrength: 0.716
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _TessellationFurDistance: 0.04
     - _TessellationGrassDistance: 0.025
     - _UVSec: 0
-    - _WindFrequency: 0.01
+    - _WindFrequency: 0.05
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.8584906, g: 0.8584906, b: 0.8584906, a: 1}
+    - _BaseColor: {r: 0.8679245, g: 0.8679245, b: 0.8679245, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _FurDirection: {r: 0, g: -1, b: 0, a: 0}
+    - _FurTipColor: {r: 1, g: 1, b: 1, a: 1}
     - _GrassTipColor: {r: 1, g: 1, b: 1, a: 1}
-    - _WindVelocity: {r: 0.1, g: 0, b: 0.05, a: 0}
+    - _WindVelocity: {r: 0.05, g: 0, b: 0.05, a: 0}
   m_BuildTextureStacks: []

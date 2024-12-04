@@ -199,7 +199,8 @@ Shader "Custom/ShellFur"
 	                
                 // Add ambient light to shadows
                 shadow = max(shadow, _ShadowAmbient);
-                
+
+                // Apply lighting - half lambert
                 float light = saturate(dot(normalize(_WorldSpaceLightPos0), f.normal)) * 0.5 + 0.5;
                 half rim = pow(1.0 - saturate(dot(normalize(f.viewDir), f.normal)), _RimLightPow);
                 color *= (light + rim) * _LightColor0 * shadow + float4(ShadeSH9(float4(f.normal, 1)), 1.0);

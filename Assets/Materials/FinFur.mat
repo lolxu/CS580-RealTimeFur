@@ -47,6 +47,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _FurMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _GrassMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -74,17 +78,19 @@ Material:
     m_Ints: []
     m_Floats:
     - _BendDelta: 0
-    - _BladeBendCurve: 2
+    - _BladeBendCurve: 3.21
     - _BladeBendDistance: 0.5
-    - _BladeHeightMax: 0.6
-    - _BladeHeightMin: 0.5
+    - _BladeHeightMax: 0.51
+    - _BladeHeightMin: 0.2
     - _BladeSegments: 4
-    - _BladeWidthMax: 0.5
-    - _BladeWidthMin: 0.5
+    - _BladeWidthMax: 0.2
+    - _BladeWidthMin: 0.2
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
+    - _FurFalloff: 0.05
+    - _FurThreshold: 0.5
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
@@ -99,16 +105,18 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TessellationGrassDistance: 0.1
+    - _TessellationFurDistance: 0.1
+    - _TessellationGrassDistance: 0.11
     - _UVSec: 0
-    - _WindFrequency: 0.005
+    - _WindFrequency: 0.05
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.26415092, g: 0.26415092, b: 0.26415092, a: 1}
+    - _BaseColor: {r: 0.5188679, g: 0.5188679, b: 0.5188679, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FurDirection: {r: 0, g: 0, b: 0, a: 1}
+    - _FurDirection: {r: 0, g: -1, b: 0, a: 0}
+    - _FurTipColor: {r: 1, g: 1, b: 1, a: 1}
     - _FurlDirection: {r: 1, g: 1, b: 1, a: 1}
     - _GrassTipColor: {r: 1, g: 1, b: 1, a: 1}
-    - _WindVelocity: {r: 0.1, g: 0, b: 0, a: 0}
+    - _WindVelocity: {r: 0.05, g: 0.02, b: 0.01, a: 0}
   m_BuildTextureStacks: []

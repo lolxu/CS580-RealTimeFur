@@ -3,7 +3,7 @@ Shader "Custom/FinShader"
     Properties
     {
         _BaseColor("Base Color", Color) = (1, 1, 1, 1)
-        _GrassTipColor("Grass Tip Color", Color) = (1, 1, 1, 1)
+        _FurTipColor("Fur Tip Color", Color) = (1, 1, 1, 1)
         _BladeTexture("Blade Texture", 2D) = "white" {}
         
         _BladeWidthMin("Blade Minimum Width", Range(0, 5)) = 0.015
@@ -17,11 +17,11 @@ Shader "Custom/FinShader"
     	
     	_BendDelta("Bend Variation", Range(0, 1)) = 0.2
     	
-    	_TessellationGrassDistance("Tessellation Grass Distance", Range(0.01, 2)) = 0.1
+    	_TessellationFurDistance("Tessellation Fur Distance", Range(0.01, 2)) = 0.1
 
-    	_GrassMap("Grass Visibility Map", 2D) = "white" {}
-		_GrassThreshold("Grass Visibility Threshold", Range(-0.1, 1)) = 0.5
-		_GrassFalloff("Grass Visibility Fade-In Falloff", Range(0, 0.5)) = 0.05
+    	_FurMap("Fur Visibility Map", 2D) = "white" {}
+		_FurThreshold("Fur Visibility Threshold", Range(-0.1, 1)) = 0.5
+		_FurFalloff("Fur Visibility Fade-In Falloff", Range(0, 0.5)) = 0.05
     	
     	_WindMap("Wind Offset Map", 2D) = "bump" {}
 		_WindVelocity("Wind Velocity", Vector) = (1, 0, 0, 0)
@@ -30,7 +30,7 @@ Shader "Custom/FinShader"
     	_ShadowStrength("Shadow Strength", Range(0, 1)) = 0.5  // Lower value = less intense shadows
         _ShadowAmbient("Shadow Ambient", Range(0, 1)) = 0.2
     	
-    	_FurDirection("Base fur move direction", Vector) = (1.0, 1.0, 1.0, 1.0)
+    	_FurDirection("Base fur move direction", Vector) = (1.0, 1.0, 1.0)
     }
     SubShader
     {		
@@ -80,7 +80,7 @@ Shader "Custom/FinShader"
 					
 				
 			    float4 _BaseColor;
-			    float4 _GrassTipColor;
+			    float4 _FurTipColor;
 			    sampler2D _BladeTexture;
 
 			    float _BladeWidthMin;
@@ -94,12 +94,12 @@ Shader "Custom/FinShader"
 
 			    float _BendDelta;
 
-			    float _TessellationGrassDistance;
+			    float _TessellationFurDistance;
 
-			    sampler2D _GrassMap;
-			    float4 _GrassMap_ST;
-			    float _GrassThreshold;
-			    float _GrassFalloff;
+			    sampler2D _FurMap;
+			    float4 _FurMap_ST;
+			    float _FurThreshold;
+			    float _FurFalloff;
 
 			    sampler2D _WindMap;
 			    float4 _WindMap_ST; 
@@ -109,7 +109,7 @@ Shader "Custom/FinShader"
 			    float _ShadowStrength;
 				float _ShadowAmbient;
 
-				float4 _FurDirection;
+				float3 _FurDirection;
 			    
 
     			// Simple noise function, sourced from http://answers.unity.com/answers/624136/view.html
@@ -158,7 +158,7 @@ Shader "Custom/FinShader"
     				float2 uv : TEXCOORD0;
     			};
 
-    			// For Geometric shader and creating grass
+    			// For Geometric shader and creating Fur
     			struct GeometricData
     			{
     				float4 pos : SV_POSITION;
@@ -182,7 +182,7 @@ Shader "Custom/FinShader"
     				vOut.vertex = UnityObjectToClipPos(vIn.vertex.xyz);
     				vOut.normal = vIn.normal;
     				vOut.tangent = vIn.tangent;
-    				vOut.uv = TRANSFORM_TEX(vIn.uv, _GrassMap);
+    				vOut.uv = TRANSFORM_TEX(vIn.uv, _FurMap);
     				
     				return vOut;
     			}
@@ -206,7 +206,7 @@ Shader "Custom/FinShader"
     				vOut.vertex = mul(unity_ObjectToWorld, vIn.vertex); // Transforms to world position
     				vOut.normal = UnityObjectToWorldNormal(vIn.normal);
     				vOut.tangent = vIn.tangent;
-    				vOut.uv = TRANSFORM_TEX(vIn.uv, _GrassMap);
+    				vOut.uv = TRANSFORM_TEX(vIn.uv, _FurMap);
     				
     				return vOut;
     			}
@@ -220,7 +220,7 @@ Shader "Custom/FinShader"
     				float3 v1 = vIn_1.vertex.xyz;
     				float edgeLength = distance(v0, v1);
 
-    				float result = edgeLength / _TessellationGrassDistance;
+    				float result = edgeLength / _TessellationFurDistance;
 
     				return result;
     			}
@@ -295,11 +295,11 @@ Shader "Custom/FinShader"
     			void geom(point VertexOutput input[1], inout TriangleStream<GeometricData> triangleStream)
     			{
 
-					// Read from the Grass Map texture
-    				float grassVisibility = tex2Dlod(_GrassMap, float4(input[0].uv, 0, 0)).r;
+					// Read from the Fur Map texture
+    				float FurVisibility = tex2Dlod(_FurMap, float4(input[0].uv, 0, 0)).r;
 
-    				// Check if the grass needs to spawn or not
-    				if (grassVisibility >= _GrassThreshold)
+    				// Check if the Fur needs to spawn or not
+    				if (FurVisibility >= _FurThreshold)
     				{
     				
     					float3 pos = input[0].vertex.xyz;
@@ -316,17 +316,12 @@ Shader "Custom/FinShader"
 						);
 
     					// Rotate around z-axis by some random amount
-    					float3x3 randRotateMat = angleAxis3x3(rand(pos) * UNITY_TWO_PI, float3(0, 0, 1.0f));
+    					float seed = rand(pos);
+    					float3x3 randRotateMat = angleAxis3x3(seed * UNITY_TWO_PI, float3(0, 0, 1.0f));
 
     					// Rotate around the bottom of the blade by some random amount
-    					float3x3 randBendMat = angleAxis3x3(rand(pos) * _BendDelta * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
-
-    					// float3x3 transformMat = float3x3
-    					// (
-    					// 	1, 0, 0,
-    					// 	0, 1, 0,
-    					// 	0, 0, 1
-    					// );
+    					float3 bendAxis = normalize(_FurDirection);
+    					float3x3 randBendMat = angleAxis3x3(_BendDelta * UNITY_PI * clamp(dot(UnityObjectToWorldNormal(normal), bendAxis) * 2.0f, -2.0f, -0.5f), bendAxis);
 
     					// Sampling from wind texture
     					float2 windUV = pos.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
@@ -340,7 +335,7 @@ Shader "Custom/FinShader"
     					float3x3 baseTransformMat = mul(tangentToLocal, randRotateMat);
     					float3x3 tipTransformMat = mul(mul(mul(tangentToLocal, windMat), randBendMat), randRotateMat);
     					
-						float falloff = smoothstep(_GrassThreshold, _GrassThreshold + _GrassFalloff, grassVisibility);
+						float falloff = smoothstep(_FurThreshold, _FurThreshold + _FurFalloff, FurVisibility);
     					
     					float width = lerp(_BladeWidthMin, _BladeWidthMax, rand(pos.xyz) * falloff);
     					float height = lerp(_BladeHeightMin, _BladeHeightMax, rand(pos.zyx) * falloff);
@@ -376,7 +371,7 @@ Shader "Custom/FinShader"
 					float4 color = tex2D(_BladeTexture, gIn.uv);
 					if (color.z == 0 || color.a < 0.1f) discard;
 					
-	                color *= lerp(_BaseColor, _GrassTipColor, gIn.uv.y);
+	                color *= lerp(_BaseColor, _FurTipColor, gIn.uv.y);
 	                
 	                // Get shadow attenuation
 	                float shadow = SHADOW_ATTENUATION(gIn);
@@ -387,7 +382,7 @@ Shader "Custom/FinShader"
 	                // Add ambient light to shadows
 	                shadow = max(shadow, _ShadowAmbient);
 	                
-	                // Apply lighting
+	                // Apply lighting - half lambert
 					float light = saturate(dot(normalize(_WorldSpaceLightPos0), gIn.normal)) * 0.5 + 0.5;
 					color *= (light) * _LightColor0 * shadow + float4(ShadeSH9(float4(gIn.normal, 1)), 1.0);
 	                
@@ -426,7 +421,7 @@ Shader "Custom/FinShader"
             #define BLADE_SEGMENTS 4
             
 		    float4 _BaseColor;
-		    float4 _GrassTipColor;
+		    float4 _FurTipColor;
 		    sampler2D _BladeTexture;
 
 		    float _BladeWidthMin;
@@ -440,18 +435,20 @@ Shader "Custom/FinShader"
 
 		    float _BendDelta;
 
-		    float _TessellationGrassDistance;
+		    float _TessellationFurDistance;
 
-		    sampler2D _GrassMap;
-		    float4 _GrassMap_ST;
-		    float _GrassThreshold;
-		    float _GrassFalloff;
+		    sampler2D _FurMap;
+		    float4 _FurMap_ST;
+		    float _FurThreshold;
+		    float _FurFalloff;
 
 		    sampler2D _WindMap;
 		    float4 _WindMap_ST; 
 		    float4 _WindVelocity;
 		    float _WindFrequency;
 
+            float3 _FurDirection;
+            
 		    float4 _ShadowColor;
             
             
@@ -522,7 +519,7 @@ Shader "Custom/FinShader"
     			vOut.vertex = UnityObjectToClipPos(vIn.vertex.xyz);
     			vOut.normal = vIn.normal;
     			vOut.tangent = vIn.tangent;
-    			vOut.uv = TRANSFORM_TEX(vIn.uv, _GrassMap);
+    			vOut.uv = TRANSFORM_TEX(vIn.uv, _FurMap);
     			
     			return vOut;
     		}
@@ -546,7 +543,7 @@ Shader "Custom/FinShader"
     			vOut.vertex = mul(unity_ObjectToWorld, vIn.vertex); // Transforms to world position
     			vOut.normal = UnityObjectToWorldNormal(vIn.normal);
     			vOut.tangent = vIn.tangent;
-    			vOut.uv = TRANSFORM_TEX(vIn.uv, _GrassMap);
+    			vOut.uv = TRANSFORM_TEX(vIn.uv, _FurMap);
     			
     			return vOut;
     		}
@@ -560,7 +557,7 @@ Shader "Custom/FinShader"
     			float3 v1 = vIn_1.vertex.xyz;
     			float edgeLength = distance(v0, v1);
 
-    			float result = edgeLength / _TessellationGrassDistance;
+    			float result = edgeLength / _TessellationFurDistance;
 
     			return result;
     		}
@@ -632,11 +629,11 @@ Shader "Custom/FinShader"
                 // Copy your existing geometry shader code here but use transformGeomToClipShadow
                 // instead of transformGeomToClip
                 // ...
-            	// Read from the Grass Map texture
-    				float grassVisibility = tex2Dlod(_GrassMap, float4(input[0].uv, 0, 0)).r;
+            	// Read from the Fur Map texture
+    				float FurVisibility = tex2Dlod(_FurMap, float4(input[0].uv, 0, 0)).r;
 
-    				// Check if the grass needs to spawn or not
-    				if (grassVisibility >= _GrassThreshold)
+    				// Check if the Fur needs to spawn or not
+    				if (FurVisibility >= _FurThreshold)
     				{
     				
     					float3 pos = input[0].vertex.xyz;
@@ -652,18 +649,13 @@ Shader "Custom/FinShader"
     						tangent.z, bitangent.z, normal.z
 						);
 
-    					// Rotate around y-axis by some random amount
-    					float3x3 randRotateMat = angleAxis3x3(rand(pos) * UNITY_TWO_PI, float3(0, 0, 1.0f));
+    					// Rotate around z-axis by some random amount
+    					float seed = rand(pos);
+    					float3x3 randRotateMat = angleAxis3x3(seed * UNITY_TWO_PI, float3(0, 0, 1.0f));
 
     					// Rotate around the bottom of the blade by some random amount
-    					float3x3 randBendMat = angleAxis3x3(rand(pos.zzx) * _BendDelta * UNITY_PI * 0.5f, float3(-1.0f, 0, 0));
-
-    					// float3x3 transformMat = float3x3
-    					// (
-    					// 	1, 0, 0,
-    					// 	0, 1, 0,
-    					// 	0, 0, 1
-    					// );
+    					float3 bendAxis = normalize(_FurDirection);
+    					float3x3 randBendMat = angleAxis3x3(_BendDelta * UNITY_PI * clamp(dot(UnityObjectToWorldNormal(normal), bendAxis) * 2.0f, -2.0f, -0.5f), bendAxis);
 
     					// Sampling from wind texture
     					float2 windUV = pos.xz * _WindMap_ST.xy + _WindMap_ST.zw + normalize(_WindVelocity.xzy) * _WindFrequency * _Time.y;
@@ -677,7 +669,7 @@ Shader "Custom/FinShader"
     					float3x3 baseTransformMat = mul(tangentToLocal, randRotateMat);
     					float3x3 tipTransformMat = mul(mul(mul(tangentToLocal, windMat), randBendMat), randRotateMat);
     					
-						float falloff = smoothstep(_GrassThreshold, _GrassThreshold + _GrassFalloff, grassVisibility);
+						float falloff = smoothstep(_FurThreshold, _FurThreshold + _FurFalloff, FurVisibility);
     					
     					float width = lerp(_BladeWidthMin, _BladeWidthMax, rand(pos.xyz) * falloff);
     					float height = lerp(_BladeHeightMin, _BladeHeightMax, rand(pos.zyx) * falloff);
