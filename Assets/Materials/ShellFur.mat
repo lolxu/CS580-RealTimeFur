@@ -77,10 +77,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AlphaCutoff: 0.45
+    - _AlphaCutoff: 0.4
     - _BumpScale: 1
     - _Cutoff: 0.5
-    - _Density: 1
+    - _Density: 0.7
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _GlossMapScale: 1
@@ -93,20 +93,20 @@ Material:
     - _Occlusion: 0.2
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _RimLightPow: 0.3
-    - _ShadowAmbient: 0
+    - _RimLightPow: 1
+    - _ShadowAmbient: 0.4
     - _ShadowBias: 0
     - _ShadowExtraBias: 0
     - _ShadowStrength: 0.7
     - _ShellAmount: 16
-    - _ShellCount: 50
-    - _ShellLength: 0.065
+    - _ShellCount: 28
+    - _ShellLength: 0.025
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _Thiccness: 5
     - _UVSec: 0
-    - _WindFrequency: 0.0075
+    - _WindFrequency: 0.007
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
@@ -114,5 +114,5 @@ Material:
     - _FurColor: {r: 0.8301887, g: 0.8301887, b: 0.8301887, a: 1}
     - _ShadowBias: {r: -1, g: -1, b: -1, a: 1}
     - _ShellDirection: {r: 0, g: 0, b: 0, a: 1}
-    - _WindVelocity: {r: -0.5, g: 0, b: 0, a: 0.5}
+    - _WindVelocity: {r: -0.25, g: 0, b: 0, a: 0.25}
   m_BuildTextureStacks: []

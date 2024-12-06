@@ -183,8 +183,8 @@ Shader "Custom/ShellFur"
                 float4 sampleTex = tex2D(_FurBaseMap, f.baseUV);
 
                 float alpha = sampleFur.r * (1.0f - f.layer);
-                // Making fur strands darker and thinner deeper it goes
-                if (f.layer > 0.0f && alpha.r < _AlphaCutoff) discard;
+                // Discard pixels with alpha cutoff
+                if (f.layer > 0.0f && alpha < _AlphaCutoff) discard;
 
                 float4 color = _FurColor * sampleTex;
 

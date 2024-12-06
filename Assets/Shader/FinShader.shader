@@ -4,16 +4,16 @@ Shader "Custom/FinShader"
     {
         _BaseColor("Base Color", Color) = (1, 1, 1, 1)
         _FurTipColor("Fur Tip Color", Color) = (1, 1, 1, 1)
-        _BladeTexture("Blade Texture", 2D) = "white" {}
+        _BladeTexture("Fin Texture", 2D) = "white" {}
         
-        _BladeWidthMin("Blade Minimum Width", Range(0, 5)) = 0.015
-        _BladeWidthMax("Blade Maximum Width", Range(0, 5)) = 0.06
-        _BladeHeightMin("Blade Minimum Height", Range(0, 5)) = 0.1
-        _BladeHeightMax("Blade Maximum Height", Range(0, 5)) = 0.2
+        _BladeWidthMin("Fin Minimum Width", Range(0, 5)) = 0.015
+        _BladeWidthMax("Fin Maximum Width", Range(0, 5)) = 0.06
+        _BladeHeightMin("Fin Minimum Height", Range(0, 5)) = 0.1
+        _BladeHeightMax("Fin Maximum Height", Range(0, 5)) = 0.2
         
-        _BladeSegments("Blade Segments", Int) = 3
-		_BladeBendDistance("Blade Forward Amount", Float) = 0.38
-		_BladeBendCurve("Blade Curvature Amount", Range(1, 4)) = 2
+        _BladeSegments("Fin Segments", Int) = 3
+		_BladeBendDistance("Fin Forward Amount", Float) = 0.38
+		_BladeBendCurve("Fin Curvature Amount", Range(1, 4)) = 2
     	
     	_BendDelta("Bend Variation", Range(0, 1)) = 0.2
     	
